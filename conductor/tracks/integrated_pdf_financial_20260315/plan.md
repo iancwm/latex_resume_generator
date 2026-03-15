@@ -24,8 +24,8 @@
 ## Phase 3: Enhanced Privacy Overrides
 
 1. **Privacy Logic Enhancement**
-   - [ ] Task: Write tests for field-level privacy overrides (e.g., overriding global public/private settings)
-   - [ ] Task: Update `redact_data` in `src/engine.py` to support explicit override markers in YAML
+   - [x] Task: Write tests for field-level privacy overrides [ccfb48b] (e.g., overriding global public/private settings)
+   - [x] Task: Update `redact_data` in `src/engine.py` [ccfb48b] to support explicit override markers in YAML
 2. **Verification**
    - [ ] Task: Confirm that overrides work as expected across nested YAML structures
 3. **Phase Checkpoint**
