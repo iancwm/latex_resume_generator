@@ -1,0 +1,59 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm}
+\setlength{\parindent}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+}
+
+\begin{document}
+
+\begin{center}
+{\Large \textbf{\VAR{basics.name}}}\\
+\VAR{basics.label}\\
+\VAR{basics.email} | \VAR{basics.phone} | \href{\VAR{basics.url}}{\VAR{basics.url}}\\
+\VAR{basics.location.city}, \VAR{basics.location.region}
+\end{center}
+
+\vspace{0.6em}
+\textbf{Experience}
+\BLOCK{for job in work}
+
+\VAR{job.position} - \VAR{job.company} (\VAR{job.startDate} -- \VAR{job.endDate})
+\BLOCK{if job.summary}
+\begin{itemize}[leftmargin=1.4em,noitemsep,topsep=0.2em]
+\BLOCK{for item in job.summary}
+\item \VAR{item}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\BLOCK{endfor}
+
+\textbf{Education}
+\BLOCK{for edu in education}
+
+\VAR{edu.institution} - \VAR{edu.area} (\VAR{edu.startDate} -- \VAR{edu.endDate})
+\BLOCK{endfor}
+
+\vspace{0.4em}
+\textbf{Skills}
+\BLOCK{for skill in skills}
+
+\VAR{skill.category}: \VAR{skill.keywords|join(", ")}
+\BLOCK{endfor}
+
+\vspace{0.4em}
+\textbf{Projects}
+\BLOCK{for project in projects}
+
+\VAR{project.name} (\href{\VAR{project.url}}{Link}) - \VAR{project.description}
+\BLOCK{endfor}
+
+\end{document}

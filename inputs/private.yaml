@@ -1,0 +1,9 @@
+basics:
+  name: "Alexander Sterling"
+  label: "Financial Analyst"
+  email: "alexander.sterling@alumni.harvard.edu"
+  phone: "+1 (617) 555-0199"
+  url: "https://linkedin.com/in/alexander_sterling"
+  location:
+    city: "Boston"
+    region: "MA"

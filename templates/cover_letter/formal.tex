@@ -1,0 +1,42 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+
+\geometry{left=2.2cm, right=2.2cm, top=2.2cm, bottom=2.2cm}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\textbf{\VAR{basics.name}}\\
+\VAR{basics.email} | \VAR{basics.phone}\\
+\VAR{basics.location.city}, \VAR{basics.location.region}\\
+\href{\VAR{basics.url}}{\VAR{basics.url}}
+
+\vspace{1cm}
+\today
+
+\vspace{1cm}
+\textbf{Hiring Manager}\\
+Target Company\\
+123 Business Rd.\\
+Tech City, CA
+
+\vspace{1cm}
+Dear Hiring Manager,
+
+\vspace{0.6cm}
+I am pleased to submit my application for the position at Target Company. I am a \VAR{basics.label} with practical experience in \VAR{skills[0].keywords|join(", ")}, and I am confident I can contribute effectively to your team.
+
+\vspace{0.6cm}
+At \VAR{work[0].company}, I \VAR{work[0].summary[0]}. This experience, combined with my academic background in \VAR{education[0].area}, has prepared me to deliver strong outcomes in a fast-moving environment.
+
+\vspace{0.6cm}
+Thank you for your consideration. I would welcome the opportunity to discuss how my background aligns with your needs.
+
+\vspace{1cm}
+Sincerely,\\
+\vspace{0.8cm}
+\VAR{basics.name}
+
+\end{document}

@@ -1,0 +1,30 @@
+work:
+  - company: "Goldman Sachs"
+    position: "Investment Banking Analyst"
+    startDate: "2022-07"
+    endDate: "Present"
+    summary: [] # Empty summary to cause LaTeX error
+
+  - company: "Bridgewater Associates"
+    position: "Investment Intern"
+    startDate: "2021-06"
+    endDate: "2021-08"
+    summary:
+      - "Developed quantitative models for global macro strategies."
+
+education:
+  - institution: "Harvard University"
+    area: "B.A. in Economics"
+    startDate: "2018-09"
+    endDate: "2022-05"
+
+skills:
+  - category: "Finance"
+    keywords: ["DCF", "LBO"]
+  - category: "EmptySkills"
+    keywords: null # null to test join filter
+
+projects:
+  - name: "Trading Bot"
+    description: "Built a bot."
+    url: "https://github.com/asterling/bot"

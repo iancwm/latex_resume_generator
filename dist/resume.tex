@@ -1,0 +1,65 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% Margins
+\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+% Hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{1em}{0.5em}
+
+\begin{document}
+
+% Header
+\begin{center}
+    {\Huge \textbf{Alexander Sterling}} \
+    \vspace{2mm}
+    Financial Analyst \\
+    alexander.sterling@alumni.harvard.edu | +1 (617) 555-0199 \\
+    \href{https://linkedin.com/in/alexander\_sterling}{https://linkedin.com/in/alexander\_sterling} | Boston, MA
+\end{center}
+
+% Experience
+\section*{Experience}
+\noindent \textbf{Investment Banking Analyst} \hfill 2022-07 -- Present \\
+\textit{Goldman Sachs}
+\vspace{2mm}
+\noindent \textbf{Investment Intern} \hfill 2021-06 -- 2021-08 \\
+\textit{Bridgewater Associates}
+\begin{itemize}[noitemsep,topsep=0pt]
+        \item Developed quantitative models for global macro strategies.
+    \end{itemize}
+\vspace{2mm}
+
+% Education
+\section*{Education}
+\noindent \textbf{Harvard University} \hfill 2018-09 -- 2022-05 \\
+\textit{B.A. in Economics}
+\vspace{2mm}
+
+% Skills
+\section*{Skills}
+\begin{description}[style=multiline,leftmargin=3cm,font=\bfseries]
+        \item[Finance] DCF, LBO
+        \item[EmptySkills] 
+    \end{description}
+
+% Projects
+\section*{Projects}
+\noindent \textbf{Trading Bot} \hfill \href{https://github.com/asterling/bot}{Link} \\
+Built a bot.
+\vspace{2mm}
+
+\end{document}

@@ -1,0 +1,3 @@
+defaults:
+  resume_template: modern
+  cover_letter_template: standard

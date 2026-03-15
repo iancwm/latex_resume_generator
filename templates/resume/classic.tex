@@ -1,0 +1,57 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+\geometry{left=1.8cm, right=1.8cm, top=1.8cm, bottom=1.8cm}
+\setlength{\parindent}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+}
+
+\titleformat{\section}{\normalsize\bfseries\uppercase}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.4em}
+
+\begin{document}
+
+{\LARGE \textbf{\VAR{basics.name}}}\\
+\VAR{basics.label}\\
+\VAR{basics.email} | \VAR{basics.phone} | \href{\VAR{basics.url}}{\VAR{basics.url}}\\
+\VAR{basics.location.city}, \VAR{basics.location.region}
+
+\section*{Experience}
+\BLOCK{for job in work}
+\textbf{\VAR{job.position}} \hfill \VAR{job.startDate} -- \VAR{job.endDate}\\
+\textit{\VAR{job.company}}
+\BLOCK{if job.summary}
+\begin{itemize}[leftmargin=1.5em,noitemsep,topsep=0.25em]
+\BLOCK{for item in job.summary}
+\item \VAR{item}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\BLOCK{endfor}
+
+\section*{Education}
+\BLOCK{for edu in education}
+\textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate}\\
+\textit{\VAR{edu.area}}\\
+\BLOCK{endfor}
+
+\section*{Skills}
+\BLOCK{for skill in skills}
+\textbf{\VAR{skill.category}}: \VAR{skill.keywords|join(", ")}\\
+\BLOCK{endfor}
+
+\section*{Projects}
+\BLOCK{for project in projects}
+\textbf{\VAR{project.name}} (\href{\VAR{project.url}}{Link})\\
+\VAR{project.description}\\
+\BLOCK{endfor}
+
+\end{document}

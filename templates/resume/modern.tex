@@ -1,0 +1,75 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% Margins
+\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+% Hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{1em}{0.5em}
+
+\begin{document}
+
+% Header
+\begin{center}
+    {\Huge \textbf{\VAR{basics.name}}} \
+    \vspace{2mm}
+    \VAR{basics.label} \\
+    \VAR{basics.email} | \VAR{basics.phone} \\
+    \href{\VAR{basics.url}}{\VAR{basics.url}} | \VAR{basics.location.city}, \VAR{basics.location.region}
+\end{center}
+
+% Experience
+\section*{Experience}
+\BLOCK{for job in work}
+\noindent \textbf{\VAR{job.position}} \hfill \VAR{job.startDate} -- \VAR{job.endDate} \\
+\textit{\VAR{job.company}}
+\BLOCK{if job.summary}
+\begin{itemize}[noitemsep,topsep=0pt]
+    \BLOCK{for item in job.summary}
+    \item \VAR{item}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\vspace{2mm}
+\BLOCK{endfor}
+
+% Education
+\section*{Education}
+\BLOCK{for edu in education}
+\noindent \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
+\textit{\VAR{edu.area}}
+\vspace{2mm}
+\BLOCK{endfor}
+
+% Skills
+\section*{Skills}
+\BLOCK{if skills}
+\begin{description}[style=multiline,leftmargin=3cm,font=\bfseries]
+    \BLOCK{for skill in skills}
+    \item[\VAR{skill.category}] \VAR{skill.keywords|join(", ")}
+    \BLOCK{endfor}
+\end{description}
+\BLOCK{endif}
+
+% Projects
+\section*{Projects}
+\BLOCK{for project in projects}
+\noindent \textbf{\VAR{project.name}} \hfill \href{\VAR{project.url}}{Link} \\
+\VAR{project.description}
+\vspace{2mm}
+\BLOCK{endfor}
+
+\end{document}
