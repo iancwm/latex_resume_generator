@@ -29,25 +29,41 @@ def load_yaml(path: str) -> dict:
         data = yaml.safe_load(f)
         return data if isinstance(data, dict) else {}
 
-def redact_data(data: dict) -> dict:
+def redact_data(data, is_redaction_mode=True, default_private=True):
     """
-    Recursively replaces string values with [KEY REDACTED].
+    Recursively processes data for privacy overrides and redaction.
+    - is_redaction_mode: Whether to actually redact (True) or just unwrap (False).
+    - default_private: Default behavior for strings if no override is present.
     """
-    redacted = {}
-    for k, v in data.items():
-        if isinstance(v, dict):
-            redacted[k] = redact_data(v)
-        elif isinstance(v, list):
-            redacted[k] = [
-                redact_data(item) if isinstance(item, dict)
-                else "REDACTED: {}".format(k.upper()) if isinstance(item, str)
-                else item for item in v
-            ]
-        elif isinstance(v, str):
-            redacted[k] = "REDACTED: {}".format(k.upper())
-        else:
-            redacted[k] = v
-    return redacted
+    if isinstance(data, dict):
+        return {k: redact_inner(k, v, is_redaction_mode, default_private) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [redact_data(item, is_redaction_mode, default_private) for item in data]
+    elif isinstance(data, str):
+        if is_redaction_mode and default_private:
+            return "REDACTED: VALUE"
+        return data
+    return data
+
+def redact_inner(key, value, is_redaction_mode, default_private):
+    """ Helper to handle redaction with key context for better placeholders. """
+    if isinstance(value, dict):
+        # Check for override structure: {"value": "...", "private": bool}
+        if "value" in value and "private" in value and len(value) == 2:
+            should_redact = value["private"] if is_redaction_mode else False
+            if should_redact:
+                return "REDACTED: {}".format(key.upper())
+            else:
+                # Override says it's NOT private, so pass default_private=False
+                return redact_data(value["value"], is_redaction_mode, default_private=False)
+        return redact_data(value, is_redaction_mode, default_private)
+    elif isinstance(value, list):
+        return [redact_data(item, is_redaction_mode, default_private) for item in value]
+    elif isinstance(value, str):
+        if is_redaction_mode and default_private:
+            return "REDACTED: {}".format(key.upper())
+        return value
+    return value
 
 def sanitize_data(data):
     """
@@ -94,8 +110,9 @@ def generate(private_path, public_path, template_path, output_path, redacted=Fal
     private_data = load_yaml(private_path)
     public_data = load_yaml(public_path)
     
-    if redacted:
-        private_data = redact_data(private_data)
+    # Apply privacy logic to both, but with different defaults
+    private_data = redact_data(private_data, is_redaction_mode=redacted, default_private=True)
+    public_data = redact_data(public_data, is_redaction_mode=redacted, default_private=False)
         
     full_data = {**public_data, **private_data}
     
