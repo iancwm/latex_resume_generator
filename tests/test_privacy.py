@@ -42,5 +42,26 @@ class TestPrivacy(unittest.TestCase):
         self.assertEqual(redacted["basics"]["location"]["city"], "San Francisco")
         self.assertEqual(redacted["basics"]["location"]["region"], "REDACTED: REGION")
 
+    def test_list_item_privacy_override(self):
+        data = {
+            "work": [
+                {
+                    "company": "Public Corp",
+                    "position": {"value": "Secret Agent", "private": True}
+                },
+                {
+                    "company": {"value": "Hidden Ltd", "private": False},
+                    "position": "Analyst"
+                }
+            ]
+        }
+        # default_private=False for public work data
+        redacted = redact_data(data, is_redaction_mode=True, default_private=False)
+        
+        self.assertEqual(redacted["work"][0]["company"], "Public Corp")
+        self.assertEqual(redacted["work"][0]["position"], "REDACTED: POSITION")
+        self.assertEqual(redacted["work"][1]["company"], "Hidden Ltd")
+        self.assertEqual(redacted["work"][1]["position"], "Analyst")
+
 if __name__ == '__main__':
     unittest.main()
