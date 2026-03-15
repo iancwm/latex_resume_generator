@@ -27,7 +27,7 @@
    - [x] Task: Write tests for field-level privacy overrides [ccfb48b] (e.g., overriding global public/private settings)
    - [x] Task: Update `redact_data` in `src/engine.py` [ccfb48b] to support explicit override markers in YAML
 2. **Verification**
-   - [ ] Task: Confirm that overrides work as expected across nested YAML structures
+   - [x] Task: Confirm that overrides work as expected across nested YAML structures [b57fa02]
 3. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Enhanced Privacy Overrides' (Protocol in workflow.md)
 
