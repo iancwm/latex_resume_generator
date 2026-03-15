@@ -21,7 +21,7 @@
 3. **Phase Checkpoint**
    - [x] Task: Conductor - User Manual Verification 'Financial Template Development' [921c32b] (Protocol in workflow.md)
 
-## Phase 3: Enhanced Privacy Overrides
+## Phase 3: Enhanced Privacy Overrides [checkpoint: 30d6f19]
 
 1. **Privacy Logic Enhancement**
    - [x] Task: Write tests for field-level privacy overrides [ccfb48b] (e.g., overriding global public/private settings)
@@ -29,7 +29,7 @@
 2. **Verification**
    - [x] Task: Confirm that overrides work as expected across nested YAML structures [b57fa02]
 3. **Phase Checkpoint**
-   - [ ] Task: Conductor - User Manual Verification 'Enhanced Privacy Overrides' (Protocol in workflow.md)
+   - [x] Task: Conductor - User Manual Verification 'Enhanced Privacy Overrides' [30d6f19] (Protocol in workflow.md)
 
 ## Phase 4: Final Integration & Cleanup
 
