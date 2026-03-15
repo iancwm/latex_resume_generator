@@ -21,6 +21,10 @@ TEMPLATE_REGISTRY = {
             "path": "resume/minimal.tex",
             "description": "Minimal single-column resume",
         },
+        "financial": {
+            "path": "resume/financial.tex",
+            "description": "Traditional finance-specific layout",
+        },
     },
     "cover_letter": {
         "standard": {

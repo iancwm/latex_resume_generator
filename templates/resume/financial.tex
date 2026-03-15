@@ -1,0 +1,76 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% Traditional Serif Font
+\setmainfont{TeX Gyre Termes}
+
+% Tight Margins for Finance (Standard 0.5 - 0.75 inch)
+\geometry{left=1.27cm, right=1.27cm, top=1.27cm, bottom=1.27cm}
+\setlength{\parindent}{0pt}
+
+% Hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries\uppercase}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{0.8em}{0.4em}
+
+\begin{document}
+
+% Header
+\begin{center}
+    {\LARGE \textbf{\VAR{basics.name}}} \\
+    \vspace{1mm}
+    \VAR{basics.location.city}, \VAR{basics.location.region} | \VAR{basics.phone} | \href{mailto:\VAR{basics.email}}{\VAR{basics.email}} | \href{\VAR{basics.url}}{LinkedIn}
+\end{center}
+
+% Education
+\section*{Education}
+\BLOCK{for edu in education}
+\textbf{\VAR{edu.institution}} \hfill \VAR{basics.location.city}, \VAR{basics.location.region} \\
+\textit{\VAR{edu.area}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate}
+\vspace{1mm}
+\BLOCK{endfor}
+
+% Professional Experience
+\section*{Professional Experience}
+\BLOCK{for job in work}
+\textbf{\VAR{job.company}} \hfill \VAR{basics.location.city}, \VAR{basics.location.region} \\
+\textit{\VAR{job.position}} \hfill \VAR{job.startDate} -- \VAR{job.endDate}
+\BLOCK{if job.summary}
+\begin{itemize}[leftmargin=1.5em,noitemsep,topsep=0.2em]
+    \BLOCK{for item in job.summary}
+    \item \VAR{item}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+\vspace{1.5mm}
+\BLOCK{endfor}
+
+% Projects
+\section*{Selected Projects}
+\BLOCK{for project in projects}
+\textbf{\VAR{project.name}} \hfill \href{\VAR{project.url}}{Link} \\
+\VAR{project.description}
+\vspace{1.5mm}
+\BLOCK{endfor}
+
+% Skills & Certifications
+\section*{Technical Skills \& Certifications}
+\BLOCK{if skills}
+\begin{description}[style=multiline,leftmargin=4cm,font=\bfseries,noitemsep]
+    \BLOCK{for skill in skills}
+    \item[\VAR{skill.category}:] \VAR{skill.keywords|join(", ")}
+    \BLOCK{endfor}
+\end{description}
+\BLOCK{endif}
+
+\end{document}

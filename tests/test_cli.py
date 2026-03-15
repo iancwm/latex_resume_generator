@@ -50,5 +50,22 @@ class TestCLI(unittest.TestCase):
                     compile=True
                 )
 
+    @patch('src.main.engine_generate')
+    def test_generate_resume_financial_template(self, mock_generate):
+        with patch('os.makedirs'):
+            # Execute command
+            result = self.runner.invoke(app, ["generate-resume", "--template-name", "financial"])
+            
+            # Assertions
+            self.assertEqual(result.exit_code, 0)
+            mock_generate.assert_called_with(
+                "inputs/private.yaml",
+                "inputs/public.yaml",
+                "templates/resume/financial.tex",
+                "dist/resume.tex",
+                False, # redacted
+                compile=False
+            )
+
 if __name__ == '__main__':
     unittest.main()
