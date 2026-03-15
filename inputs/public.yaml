@@ -1,30 +1,60 @@
+# Field Metadata & Privacy Overrides:
+# You can provide a simple string value for any field, or use the override structure:
+# field:
+#   value: "your value"
+#   private: true/false
+# Fields in this file are PUBLIC by default (will be visible in --redacted mode).
+# Setting 'private: true' will force the field to be redacted even in public mode.
+
 work:
   - company: "Goldman Sachs"
     position: "Investment Banking Analyst"
+    location: "New York, NY"
     startDate: "2022-07"
     endDate: "Present"
-    summary: [] # Empty summary to cause LaTeX error
+    summary:
+      - "Executed complex financial models including DCF, LBO, and accretion/dilution analysis for over 15 M&A transactions."
+      - "Collaborated on the execution of a $5.2B acquisition in the TMT sector, managing data room and diligence workflows."
+      - "Prepared pitch books and management presentations for Fortune 500 clients, focusing on capital structure optimization."
+      - value: "Advised senior management on a confidential $1.2B divestiture strategy."
+        private: true # This specific bullet point will be redacted
 
   - company: "Bridgewater Associates"
     position: "Investment Intern"
+    location: "Westport, CT"
     startDate: "2021-06"
     endDate: "2021-08"
     summary:
-      - "Developed quantitative models for global macro strategies."
+      - "Built quantitative models to analyze the impact of currency fluctuations on emerging market debt portfolios."
+      - "Conducted deep-dive research into global macro trends, specifically focusing on Asian manufacturing indices."
+      - "Automated data collection for internal research reports using Python and SQL, reducing manual workload by 20%."
 
 education:
   - institution: "Harvard University"
     area: "B.A. in Economics"
+    location: "Cambridge, MA"
     startDate: "2018-09"
     endDate: "2022-05"
+    score: "3.92/4.0" # GPA
+    honors: ["Cum Laude", "Dean's List (all semesters)", "John Harvard Scholar"]
+    courses: ["Advanced Macroeconomics", "Game Theory", "Corporate Finance", "Machine Learning"]
 
 skills:
-  - category: "Finance"
-    keywords: ["DCF", "LBO"]
-  - category: "EmptySkills"
-    keywords: null # null to test join filter
+  - category: "Financial Analysis"
+    keywords: ["Financial Modeling", "DCF", "LBO", "M&A Execution", "Valuation (Comps, Precedents)"]
+  - category: "Technical & Data"
+    keywords: ["Python (Pandas, NumPy, Scikit-learn)", "R", "SQL", "Bloomberg Terminal", "CapIQ", "VBA"]
+  - category: "Languages"
+    keywords: ["English (Native)", "Mandarin (Fluent)", "French (Conversational)"]
 
 projects:
-  - name: "Trading Bot"
-    description: "Built a bot."
-    url: "https://github.com/asterling/bot"
+  - name: "Algorithmic Macro Trading Bot"
+    description: "Developed a Python-based trading bot that executes equity trades based on real-time macroeconomic indicators and sentiment analysis."
+    url: "https://github.com/asterling/macro-bot"
+    highlights: ["Integrated Alpaca API for execution", "Used NLP for news sentiment tracking"]
+
+  - name: "Personalized Portfolio Optimizer"
+    description: "Built a web-based tool using R and Shiny to optimize asset allocation based on Modern Portfolio Theory."
+    url: "https://github.com/asterling/portfolio-opt"
+
+interests: ["Competitive Chess", "Marathon Running", "Historical Biographies", "Urban Planning"]

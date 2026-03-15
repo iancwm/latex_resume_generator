@@ -5,8 +5,10 @@ Generate beautiful, ATS-friendly LaTeX resumes and cover letters from structured
 ## Features
 
 - **Privacy-First**: Separate your private PII (name, contact info) from public professional data.
-- **Redaction Mode**: Generate redacted versions for sharing publicly or anonymously.
-- **LaTeX Automation**: Automatic character escaping and smart quote handling.
+- **Enhanced Redaction Mode**: Generate redacted versions for sharing publicly. Includes field-level overrides to force specific fields to be public or private.
+- **Integrated PDF Compilation**: Direct PDF generation using `xelatex` integrated into the Python engine.
+- **Specialized Templates**: Includes Modern, Classic, Minimal, and a dedicated **Financial Career** template.
+- **LaTeX Automation**: Automatic character escaping, smart quote handling, and protection against empty environments (e.g., empty itemize blocks).
 - **Clean Output**: Build artifacts are automatically cleaned up, leaving only the final PDF.
 
 ## Usage
@@ -17,15 +19,15 @@ Generate beautiful, ATS-friendly LaTeX resumes and cover letters from structured
    ```
 
 2. **Configure Data**:
-   Edit `inputs/private.yaml` and `inputs/public.yaml` according to the schema below.
+   Edit `inputs/private.yaml` and `inputs/public.yaml`. See [Field Metadata & Overrides](#field-metadata--overrides) below.
 
 3. **Generate Resume**:
    ```bash
-   ./build.sh
-   ```
-   or manually:
-   ```bash
+   # Generate .tex only
    python3 src/main.py generate-resume
+   
+   # Generate .tex and compile to .pdf
+   python3 src/main.py generate-resume --compile
    ```
 
 4. **List Available Templates**:
@@ -35,14 +37,33 @@ Generate beautiful, ATS-friendly LaTeX resumes and cover letters from structured
 
 5. **Use a Specific Template**:
    ```bash
-   python3 src/main.py generate-resume --template-name classic
-   python3 src/main.py generate-cover-letter --template-name formal
+   python3 src/main.py generate-resume --template-name financial --compile
+   python3 src/main.py generate-cover-letter --template-name formal --compile
    ```
 
 6. **Redacted Version**:
    ```bash
-   python3 src/main.py generate-resume --redacted
+   python3 src/main.py generate-resume --redacted --compile
    ```
+
+## Field Metadata & Overrides
+
+You can override the default privacy setting for any field by using a structured object instead of a string:
+
+```yaml
+email:
+  value: "public.email@example.com"
+  private: false # Force this field to be visible even in --redacted mode
+```
+
+Conversely, you can hide specific details in your public file:
+
+```yaml
+- company: "Top Secret Corp"
+  position:
+    value: "Lead Engineer"
+    private: true # This will be redacted even in a normal run
+```
 
 ## Template Configuration
 
@@ -56,46 +77,11 @@ defaults:
 
 You can override config defaults with `--template-name` per command.
 
-## YAML Schema
+## Development & Testing
 
-### `inputs/private.yaml` (PII)
-```yaml
-basics:
-  name: "Jane Doe"
-  label: "Software Engineer"
-  email: "jane.doe@example.com"
-  phone: "(555) 123-4567"
-  url: "https://janedoe.com"
-  location:
-    city: "San Francisco"
-    region: "CA"
-```
+The project includes a comprehensive test suite for the engine and CLI:
 
-### `inputs/public.yaml` (Professional Data)
-```yaml
-work:
-  - company: "Tech Corp"
-    position: "Senior Developer"
-    startDate: "2020-01"
-    endDate: "Present"
-    summary:
-      - "Led a team of 5 engineers to build a scalable microservice architecture."
-      - "Reduced latency by 40% through optimization."
-
-education:
-  - institution: "University of Technology"
-    area: "B.S. Computer Science"
-    startDate: "2016-09"
-    endDate: "2020-05"
-
-skills:
-  - category: "Languages"
-    keywords: ["Python", "JavaScript", "Rust"]
-  - category: "Frameworks"
-    keywords: ["Django", "React", "Typer"]
-
-projects:
-  - name: "Resume Generator"
-    description: "A CLI tool to generate LaTeX resumes from YAML."
-    url: "https://github.com/janedoe/resume-generator"
+```bash
+# Run all tests
+PYTHONPATH=src python3 -m unittest discover tests
 ```
