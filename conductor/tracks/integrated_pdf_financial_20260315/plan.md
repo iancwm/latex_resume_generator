@@ -3,7 +3,7 @@
 ## Phase 1: Engine Integration & Automated PDF Generation
 
 1. **Integrated PDF Compilation**
-   - [ ] Task: Write tests for `compile_pdf` function (mocking subprocess calls)
+   - [x] Task: Write tests for `compile_pdf` function [9a70a74] (mocking subprocess calls)
    - [ ] Task: Implement `compile_pdf(tex_path, output_dir)` in `src/engine.py`
    - [ ] Task: Update `generate` in `engine.py` to optionally compile PDF
 2. **CLI Update**
