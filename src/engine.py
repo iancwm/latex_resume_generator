@@ -90,7 +90,7 @@ def render_template(template_path: str, output_path: str, context: dict):
     with open(output_path, 'w') as f:
         f.write(rendered)
 
-def generate(private_path, public_path, template_path, output_path, redacted=False):
+def generate(private_path, public_path, template_path, output_path, redacted=False, compile=False):
     private_data = load_yaml(private_path)
     public_data = load_yaml(public_path)
     
@@ -102,3 +102,7 @@ def generate(private_path, public_path, template_path, output_path, redacted=Fal
     clean_data = sanitize_data(full_data)
     
     render_template(template_path, output_path, clean_data)
+    
+    if compile:
+        output_dir = os.path.dirname(output_path) or "."
+        compile_pdf(output_path, output_dir)

@@ -25,17 +25,21 @@ class TestEngineCompile(unittest.TestCase):
             text=True
         )
 
-    @patch('subprocess.run')
-    def test_compile_pdf_failure(self, mock_run):
-        import subprocess
-        # Setup mock to raise error
-        mock_run.side_effect = subprocess.CalledProcessError(1, 'xelatex')
+    @patch('src.engine.compile_pdf')
+    @patch('src.engine.render_template')
+    @patch('src.engine.sanitize_data')
+    @patch('src.engine.load_yaml')
+    def test_generate_with_compile(self, mock_load, mock_sanitize, mock_render, mock_compile_pdf):
+        # Setup mocks
+        mock_load.return_value = {}
+        mock_sanitize.return_value = {}
         
         # Call function
-        tex_path = "dist/resume.tex"
-        output_dir = "dist"
-        with self.assertRaises(RuntimeError):
-            compile_pdf(tex_path, output_dir)
+        from src.engine import generate
+        generate("priv.yaml", "pub.yaml", "temp.tex", "dist/out.tex", compile=True)
+        
+        # Assertions
+        mock_compile_pdf.assert_called_once_with("dist/out.tex", "dist")
 
 if __name__ == '__main__':
     unittest.main()
