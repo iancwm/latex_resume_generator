@@ -7,7 +7,7 @@
    - [x] Task: Implement `compile_pdf(tex_path, output_dir)` [67ffdd1] in `src/engine.py`
    - [x] Task: Update `generate` in `engine.py` to optionally compile PDF [c275c6c]
 2. **CLI Update**
-   - [ ] Task: Add `--compile` flag to `generate-resume` and `generate-cover-letter` commands in `src/main.py`
+   - [x] Task: Add `--compile` flag [35c99c5] to `generate-resume` and `generate-cover-letter` commands in `src/main.py`
 3. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Engine Integration & Automated PDF Generation' (Protocol in workflow.md)
 
