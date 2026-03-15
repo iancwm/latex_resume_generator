@@ -5,7 +5,7 @@
 1. **Integrated PDF Compilation**
    - [x] Task: Write tests for `compile_pdf` function [9a70a74] (mocking subprocess calls)
    - [x] Task: Implement `compile_pdf(tex_path, output_dir)` [67ffdd1] in `src/engine.py`
-   - [ ] Task: Update `generate` in `engine.py` to optionally compile PDF
+   - [x] Task: Update `generate` in `engine.py` to optionally compile PDF [c275c6c]
 2. **CLI Update**
    - [ ] Task: Add `--compile` flag to `generate-resume` and `generate-cover-letter` commands in `src/main.py`
 3. **Phase Checkpoint**
