@@ -17,7 +17,7 @@
    - [x] Task: Create `templates/resume/financial.tex` [7236d5e] with finance-specific layout
    - [x] Task: Register the `financial` template [7236d5e] in `TEMPLATE_REGISTRY` in `src/main.py`
 2. **Template Validation**
-   - [ ] Task: Verify the new template renders correctly with existing and new finance data
+   - [x] Task: Verify the new template renders correctly [5073e67] with existing and new finance data
 3. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Financial Template Development' (Protocol in workflow.md)
 
