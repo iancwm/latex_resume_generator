@@ -14,8 +14,10 @@ Generate beautiful, ATS-friendly LaTeX resumes and cover letters from structured
 ## Usage
 
 1. **Install Dependencies**:
+   First, install `uv` (e.g., `curl -LsSf https://astral.sh/uv/install.sh | sh`).
+   Then, use `uv` to install dependencies:
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 2. **Configure Data**:
@@ -80,8 +82,8 @@ You can override config defaults with `--template-name` per command.
 ## Development & Testing
 
 The project includes a comprehensive test suite for the engine and CLI:
-
+To run tests, build, and other automation tasks, use `just`. First, install `just` (e.g., `cargo install just`).
 ```bash
 # Run all tests
-PYTHONPATH=src python3 -m unittest discover tests
+just test
 ```
