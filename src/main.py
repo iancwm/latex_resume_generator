@@ -1,60 +1,28 @@
 import os
 
 import typer
-import yaml
+# import yaml # No longer needed, as config.py handles it
 
-from engine import generate as engine_generate
+from src.engine import generate as engine_generate
+from src.config import load_config # Import the centralized load_config
 
 app = typer.Typer()
 
-TEMPLATE_REGISTRY = {
-    "resume": {
-        "modern": {
-            "path": "resume/modern.tex",
-            "description": "Modern resume design",
-        },
-        "classic": {
-            "path": "resume/classic.tex",
-            "description": "Traditional resume layout",
-        },
-        "minimal": {
-            "path": "resume/minimal.tex",
-            "description": "Minimal single-column resume",
-        },
-        "financial": {
-            "path": "resume/financial.tex",
-            "description": "Traditional finance-specific layout",
-        },
-    },
-    "cover_letter": {
-        "standard": {
-            "path": "cover_letter/standard.tex",
-            "description": "Standard cover letter",
-        },
-        "formal": {
-            "path": "cover_letter/formal.tex",
-            "description": "Formal cover letter style",
-        },
-    },
-}
+# Removed TEMPLATE_REGISTRY and FALLBACK_DEFAULTS
 
-FALLBACK_DEFAULTS = {
-    "resume_template": "modern",
-    "cover_letter_template": "standard",
-}
-
-
-def load_config(config_path: str = "config.yaml") -> dict:
-    if not os.path.exists(config_path):
-        return {}
-
-    with open(config_path, "r") as f:
-        data = yaml.safe_load(f) or {}
-
-    if not isinstance(data, dict):
-        return {}
-
-    return data
+def get_template_registry() -> dict:
+    """Loads and returns the template registry from config.yaml."""
+    config = load_config()
+    templates = config.get("templates", [])
+    registry = {"resume": {}, "cover_letter": {}}
+    for template in templates:
+        name = template.get("name")
+        file_path = template.get("file_path")
+        description = template.get("description", "No description provided.")
+        if name and file_path:
+            doc_type = "resume" if "resume" in file_path else "cover_letter" # Simple heuristic
+            registry[doc_type][name] = {"path": file_path, "description": description}
+    return registry
 
 
 def get_default_template_name(doc_type: str) -> str:
@@ -65,18 +33,26 @@ def get_default_template_name(doc_type: str) -> str:
         defaults = {}
 
     config_key = f"{doc_type}_template"
-    fallback = FALLBACK_DEFAULTS[config_key]
+    # FALLBACK_DEFAULTS is removed, define defaults here or in config.yaml
+    fallback_map = {
+        "resume_template": "modern",
+        "cover_letter_template": "standard",
+    }
+    fallback = fallback_map.get(config_key)
     configured = defaults.get(config_key, fallback)
 
-    if configured not in TEMPLATE_REGISTRY[doc_type]:
-        return fallback
+    # Validate against the loaded registry
+    registry = get_template_registry()
+    if configured not in registry[doc_type]:
+        return fallback # Fallback to a known good default if configured is invalid
 
     return configured
 
 
 def resolve_template_path(doc_type: str, template_name: str | None) -> tuple[str, str]:
+    registry = get_template_registry()
     selected = template_name or get_default_template_name(doc_type)
-    templates = TEMPLATE_REGISTRY[doc_type]
+    templates = registry[doc_type]
 
     if selected not in templates:
         valid = ", ".join(sorted(templates.keys()))
@@ -84,7 +60,8 @@ def resolve_template_path(doc_type: str, template_name: str | None) -> tuple[str
             f"Unknown {doc_type} template '{selected}'. Valid options: {valid}"
         )
 
-    template_path = os.path.join("templates", templates[selected]["path"])
+    # The template_path from config.yaml is already relative to the project root (e.g., templates/resume/modern.tex)
+    template_path = templates[selected]["path"]
     return selected, template_path
 
 @app.command()
@@ -155,18 +132,19 @@ def generate_cover_letter(
 @app.command()
 def list_templates():
     """
-    List available templates from the hardcoded registry.
+    List available templates.
     """
+    registry = get_template_registry()
     resume_default = get_default_template_name("resume")
     cover_default = get_default_template_name("cover_letter")
 
     typer.echo(f"Resume templates (default: {resume_default}):")
-    for name, data in TEMPLATE_REGISTRY["resume"].items():
+    for name, data in registry["resume"].items():
         typer.echo(f"  - {name}: {data['description']}")
 
     typer.echo("")
     typer.echo(f"Cover letter templates (default: {cover_default}):")
-    for name, data in TEMPLATE_REGISTRY["cover_letter"].items():
+    for name, data in registry["cover_letter"].items():
         typer.echo(f"  - {name}: {data['description']}")
 
 if __name__ == "__main__":

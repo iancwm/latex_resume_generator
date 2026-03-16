@@ -1,0 +1,8 @@
+{
+  "track_id": "workflow_enhancements_20260316",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-16T00:00:00Z",
+  "updated_at": "2026-03-16T00:00:00Z",
+  "description": "New feature: CLI based menu tool for guiding users through inputting their details. Use simple term menu as a dependency. New feature: Justfile for build and cleaning up automation. New feature: uv for package management. Fix: Make template library a configuration file for ease of extensibility."
+}

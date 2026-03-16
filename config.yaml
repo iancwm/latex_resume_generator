@@ -1,3 +1,28 @@
 defaults:
   resume_template: modern
   cover_letter_template: standard
+templates:
+  - name: classic
+    description: A classic resume template.
+    tags: [resume, classic]
+    file_path: templates/resume/classic.tex
+  - name: financial
+    description: A resume template tailored for financial professionals.
+    tags: [resume, financial, professional]
+    file_path: templates/resume/financial.tex
+  - name: minimal
+    description: A minimal and clean resume template.
+    tags: [resume, minimal]
+    file_path: templates/resume/minimal.tex
+  - name: modern
+    description: A modern and professional resume template.
+    tags: [resume, modern, professional]
+    file_path: templates/resume/modern.tex
+  - name: formal
+    description: A formal cover letter template.
+    tags: [cover_letter, formal]
+    file_path: templates/cover_letter/formal.tex
+  - name: standard
+    description: A standard cover letter template.
+    tags: [cover_letter, standard]
+    file_path: templates/cover_letter/standard.tex
