@@ -2,7 +2,7 @@
 
 ## Language & Core Runtime
 - **Python 3.12+**: The primary programming language for the generator engine and CLI.
-- **Virtual Environment (venv)**: Standardized Python environment isolation.
+- **uv**: A fast Python package installer and resolver used for dependency management and virtual environments.
 
 ## CLI & Templating
 - **Typer**: A modern, FastAPI-inspired library for building the command-line interface.
@@ -13,8 +13,9 @@
 
 ## Document Generation
 - **LaTeX (XeLaTeX)**: The backend for typesetting high-quality, professional documents.
+- **Subprocess Integration**: Python-driven orchestration for `xelatex` PDF compilation.
 - **Custom Sanitizer**: A bespoke module for escaping LaTeX special characters and handling smart quotes.
 
 ## Infrastructure & Build
-- **Shell Scripting (build.sh)**: For orchestrating the generation and PDF compilation process.
+- **Justfile**: A handy command runner for project-specific tasks (build, test, clean).
 - **Git**: Version control for tracking templates and code.

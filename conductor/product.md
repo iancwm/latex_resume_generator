@@ -9,7 +9,7 @@ A CLI-based open-source hub for generating professional, ATS-friendly LaTeX resu
 
 ## Key Features
 - **Privacy-First (PII Separation)**: Clear separation between private and public data with advanced redaction and field-level overrides.
-- **Template Library**: A rich collection of LaTeX styles including Modern, Classic, and specialized templates for Financial and Technology careers.
+- **Template Library**: A rich collection of LaTeX styles including Modern, Classic, Minimal, and a dedicated **Financial Career** template.
 - **Automated PDF Rendering**: Direct PDF generation from YAML without requiring external script orchestration.
 - **ATS Optimization**: Templates designed to be machine-readable by common applicant tracking systems.
 
