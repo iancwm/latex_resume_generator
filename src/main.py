@@ -112,6 +112,16 @@ def generate_interactive():
                 for k, v in existing_public.items():
                     public_data[k] = v
 
+    def input_list(prompt_msg):
+        items = []
+        typer.echo(f"{prompt_msg} (Enter empty line to finish)")
+        while True:
+            item = input("> ")
+            if not item:
+                break
+            items.append(item)
+        return items
+
     def edit_basics():
         while True:
             options = ["Name", "Email", "Phone", "Location (City)", "Location (Region)", "Back"]
@@ -124,6 +134,52 @@ def generate_interactive():
             elif choice == 4: private_data["basics"]["location"]["region"] = input("Region: ")
             elif choice == 5 or choice is None: break
 
+    def edit_work():
+        while True:
+            options = ["Add Entry", "Edit Entry", "Remove Entry", "Back"]
+            menu = TerminalMenu(options, title="Work Experience (Public Data)")
+            choice = menu.show()
+            if choice == 0:
+                entry = {"company": "", "position": "", "location": "", "startDate": "", "endDate": "", "summary": []}
+                while True:
+                    e_options = ["Company", "Position", "Location", "Start Date", "End Date", "Summary", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Add Work Entry: {entry['company'] or 'New'}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["company"] = input("Company: ")
+                    elif e_choice == 1: entry["position"] = input("Position: ")
+                    elif e_choice == 2: entry["location"] = input("Location: ")
+                    elif e_choice == 3: entry["startDate"] = input("Start Date (YYYY-MM): ")
+                    elif e_choice == 4: entry["endDate"] = input("End Date (YYYY-MM/Present): ")
+                    elif e_choice == 5: entry["summary"] = input_list("Summary Points")
+                    elif e_choice == 6 or e_choice is None: break
+                public_data["work"].append(entry)
+            elif choice == 3 or choice is None: break
+            else: typer.echo("Edit/Remove coming soon!")
+
+    def edit_education():
+        while True:
+            options = ["Add Entry", "Edit Entry", "Remove Entry", "Back"]
+            menu = TerminalMenu(options, title="Education (Public Data)")
+            choice = menu.show()
+            if choice == 0:
+                entry = {"institution": "", "area": "", "location": "", "startDate": "", "endDate": "", "score": "", "honors": [], "courses": []}
+                while True:
+                    e_options = ["Institution", "Area", "Location", "Start Date", "End Date", "Score/GPA", "Honors", "Courses", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Add Education Entry: {entry['institution'] or 'New'}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["institution"] = input("Institution: ")
+                    elif e_choice == 1: entry["area"] = input("Area of Study: ")
+                    elif e_choice == 2: entry["location"] = input("Location: ")
+                    elif e_choice == 3: entry["startDate"] = input("Start Date (YYYY-MM): ")
+                    elif e_choice == 4: entry["endDate"] = input("End Date (YYYY-MM): ")
+                    elif e_choice == 5: entry["score"] = input("Score/GPA: ")
+                    elif e_choice == 6: entry["honors"] = input_list("Honors")
+                    elif e_choice == 7: entry["courses"] = input_list("Courses")
+                    elif e_choice == 8 or e_choice is None: break
+                public_data["education"].append(entry)
+            elif choice == 3 or choice is None: break
+            else: typer.echo("Edit/Remove coming soon!")
+
     while True:
         main_options = ["Basics", "Work Experience (Public)", "Education (Public)", "Save and Exit", "Exit without Saving"]
         main_menu = TerminalMenu(main_options, title="Main Menu")
@@ -131,6 +187,10 @@ def generate_interactive():
 
         if main_choice == 0:
             edit_basics()
+        elif main_choice == 1:
+            edit_work()
+        elif main_choice == 2:
+            edit_education()
         elif main_choice == 3:
             with open("draft_private.yaml", "w") as f:
                 yaml.dump(private_data, f)
