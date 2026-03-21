@@ -6,6 +6,7 @@
 
 ## CLI & Templating
 - **Typer**: A modern, FastAPI-inspired library for building the command-line interface.
+- **simple-term-menu**: An interactive menu system for the CLI data entry workflow.
 - **Jinja2**: The templating engine used to inject YAML data into LaTeX source files, configured with custom delimiters to avoid conflicts with LaTeX syntax.
 
 ## Data Processing
@@ -14,6 +15,7 @@
 ## Document Generation
 - **LaTeX (XeLaTeX)**: The backend for typesetting high-quality, professional documents.
 - **Subprocess Integration**: Python-driven orchestration for `xelatex` PDF compilation.
+- **Configuration-Driven Templates**: Extensible template registry defined in `config.yaml`.
 - **Custom Sanitizer**: A bespoke module for escaping LaTeX special characters and handling smart quotes.
 
 ## Infrastructure & Build

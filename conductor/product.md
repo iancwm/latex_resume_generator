@@ -11,6 +11,7 @@ A CLI-based open-source hub for generating professional, ATS-friendly LaTeX resu
 - **Privacy-First (PII Separation)**: Clear separation between private and public data with advanced redaction and field-level overrides.
 - **Template Library**: A rich collection of LaTeX styles including Modern, Classic, Minimal, and a dedicated **Financial Career** template.
 - **Automated PDF Rendering**: Direct PDF generation from YAML without requiring external script orchestration.
+- **Interactive CLI Builder**: A guided, menu-driven CLI tool for inputting resume data and generating draft YAML files.
 - **ATS Optimization**: Templates designed to be machine-readable by common applicant tracking systems.
 
 ## Future Scope
