@@ -88,9 +88,29 @@ def generate_interactive():
     """
     typer.echo("Welcome to the Interactive Resume Builder!")
     
-    # Initialize empty data structures
-    private_data = {"basics": {}, "location": {}}
+    # Initialize empty data structures with default hierarchy
+    private_data = {"basics": {"location": {}}}
     public_data = {"work": [], "education": [], "skills": [], "projects": []}
+
+    # Load existing data if available
+    if os.path.exists("inputs/private.yaml"):
+        with open("inputs/private.yaml", "r") as f:
+            existing_private = yaml.safe_load(f)
+            if isinstance(existing_private, dict):
+                for k, v in existing_private.items():
+                    private_data[k] = v
+                # Ensure hierarchy is maintained
+                if not isinstance(private_data.get("basics"), dict):
+                    private_data["basics"] = {}
+                if not isinstance(private_data["basics"].get("location"), dict):
+                    private_data["basics"]["location"] = {}
+    
+    if os.path.exists("inputs/public.yaml"):
+        with open("inputs/public.yaml", "r") as f:
+            existing_public = yaml.safe_load(f)
+            if isinstance(existing_public, dict):
+                for k, v in existing_public.items():
+                    public_data[k] = v
 
     def edit_basics():
         while True:
@@ -100,8 +120,8 @@ def generate_interactive():
             if choice == 0: private_data["basics"]["name"] = input("Name: ")
             elif choice == 1: private_data["basics"]["email"] = input("Email: ")
             elif choice == 2: private_data["basics"]["phone"] = input("Phone: ")
-            elif choice == 3: private_data["basics"]["location"] = private_data.get("basics", {}).get("location", {}); private_data["basics"]["location"]["city"] = input("City: ")
-            elif choice == 4: private_data["basics"]["location"] = private_data.get("basics", {}).get("location", {}); private_data["basics"]["location"]["region"] = input("Region: ")
+            elif choice == 3: private_data["basics"]["location"]["city"] = input("City: ")
+            elif choice == 4: private_data["basics"]["location"]["region"] = input("Region: ")
             elif choice == 5 or choice is None: break
 
     while True:
