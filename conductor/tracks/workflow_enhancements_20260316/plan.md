@@ -16,7 +16,7 @@
 ## Phase 3: Interactive CLI Tool
 - [x] Task: Add `simple-term-menu` to dependencies and update `requirements.txt`. [94d2d1b]
 - [x] Task: Write failing tests for the `generate-interactive` Typer command and data saving logic (mocking prompts). [80b0461]
-- [~] Task: Implement the Typer command `generate-interactive` in `src/main.py`.
-- [~] Task: Implement the interactive input workflow using `simple-term-menu`.
-- [~] Task: Implement logic to save the inputs to `draft_public.yaml` and `draft_private.yaml`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Interactive CLI Tool' (Protocol in workflow.md)
+- [x] Task: Implement the Typer command `generate-interactive` in `src/main.py`. [b2fca38]
+- [x] Task: Implement the interactive input workflow using `simple-term-menu`. [b2fca38]
+- [x] Task: Implement logic to save the inputs to `draft_public.yaml` and `draft_private.yaml`. [b2fca38]
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Interactive CLI Tool' (Protocol in workflow.md)
