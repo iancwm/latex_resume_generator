@@ -23,8 +23,8 @@
 ## Phase 3: Expanded Input Flows (Skills & Projects)
 
 1. **Skills Section**
-   - [ ] Task: Write failing tests for the `Skills` input flow.
-   - [ ] Task: Implement the `Skills` menu (categories and keyword lists).
+   - [x] Task: Write failing tests for the `Skills` input flow. [74731d4]
+   - [~] Task: Implement the `Skills` menu (categories and keyword lists).
 2. **Projects Section**
    - [ ] Task: Write failing tests for the `Projects` input flow.
    - [ ] Task: Implement the `Projects` menu (URL and highlights list).
