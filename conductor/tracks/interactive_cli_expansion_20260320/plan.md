@@ -27,9 +27,9 @@
    - [x] Task: Implement the `Skills` menu (categories and keyword lists). [b4ec185]
 2. **Projects Section**
    - [x] Task: Write failing tests for the `Projects` input flow. [d2b11c8]
-   - [~] Task: Implement the `Projects` menu (URL and highlights list).
+   - [x] Task: Implement the `Projects` menu (URL and highlights list). [8bb24c6]
 3. **Phase Checkpoint**
-   - [ ] Task: Conductor - User Manual Verification 'Skills & Projects Flows' (Protocol in workflow.md)
+   - [~] Task: Conductor - User Manual Verification 'Skills & Projects Flows' (Protocol in workflow.md)
 
 ## Phase 4: Validation & Consistency
 
