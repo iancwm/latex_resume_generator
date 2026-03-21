@@ -19,7 +19,7 @@ class TestEngineCompile(unittest.TestCase):
         # Verify xelatex was called twice (as per build.sh logic)
         self.assertEqual(mock_run.call_count, 2)
         mock_run.assert_any_call(
-            ['xelatex', '-output-directory=dist', 'dist/resume.tex'],
+            ['xelatex', '-interaction=nonstopmode', '-output-directory=dist', 'dist/resume.tex'],
             check=True,
             capture_output=True,
             text=True

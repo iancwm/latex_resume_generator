@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+dist/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.aux
+*.log
+*.out
+*.pdf
+*.tex
+!templates/**/*.tex
+!inputs/*.yaml

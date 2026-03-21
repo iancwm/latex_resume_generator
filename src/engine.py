@@ -2,14 +2,14 @@ import yaml
 import jinja2
 import os
 import subprocess
-from sanitizer import escape_latex, smart_quotes
+from src.sanitizer import escape_latex, smart_quotes
 
 def compile_pdf(tex_path: str, output_dir: str) -> bool:
     """
     Compiles a .tex file to PDF using xelatex.
     Runs twice for proper reference handling.
     """
-    cmd = ['xelatex', f'-output-directory={output_dir}', tex_path]
+    cmd = ['xelatex', '-interaction=nonstopmode', f'-output-directory={output_dir}', tex_path]
     try:
         # First pass
         subprocess.run(cmd, check=True, capture_output=True, text=True)
@@ -17,8 +17,9 @@ def compile_pdf(tex_path: str, output_dir: str) -> bool:
         subprocess.run(cmd, check=True, capture_output=True, text=True)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error compiling PDF: {e.stderr}")
-        raise RuntimeError(f"LaTeX compilation failed: {e.stderr}")
+        msg = f"Error compiling PDF: {e.stdout}\n{e.stderr}"
+        print(msg)
+        raise RuntimeError(f"LaTeX compilation failed: {msg}")
     except FileNotFoundError:
         raise RuntimeError("xelatex not found. Please ensure it is installed and in your PATH.")
 
@@ -29,41 +30,37 @@ def load_yaml(path: str) -> dict:
         data = yaml.safe_load(f)
         return data if isinstance(data, dict) else {}
 
-def redact_data(data, is_redaction_mode=True, default_private=True):
+def redact_data(data, is_redaction_mode=True, default_private=True, key_context=None):
     """
     Recursively processes data for privacy overrides and redaction.
     - is_redaction_mode: Whether to actually redact (True) or just unwrap (False).
-    - default_private: Default behavior for strings if no override is present.
+    - default_private: Default behavior if no override is present.
+    - key_context: The key name for the current value (used for better placeholders).
     """
     if isinstance(data, dict):
-        return {k: redact_inner(k, v, is_redaction_mode, default_private) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [redact_data(item, is_redaction_mode, default_private) for item in data]
-    elif isinstance(data, str):
-        if is_redaction_mode and default_private:
-            return "REDACTED: VALUE"
-        return data
-    return data
-
-def redact_inner(key, value, is_redaction_mode, default_private):
-    """ Helper to handle redaction with key context for better placeholders. """
-    if isinstance(value, dict):
         # Check for override structure: {"value": "...", "private": bool}
-        if "value" in value and "private" in value and len(value) == 2:
-            should_redact = value["private"] if is_redaction_mode else False
+        if "value" in data and "private" in data:
+            should_redact = data["private"] if is_redaction_mode else False
             if should_redact:
-                return "REDACTED: {}".format(key.upper())
+                placeholder = key_context.upper() if key_context else "VALUE"
+                return f"REDACTED: {placeholder}"
             else:
                 # Override says it's NOT private, so pass default_private=False
-                return redact_data(value["value"], is_redaction_mode, default_private=False)
-        return redact_data(value, is_redaction_mode, default_private)
-    elif isinstance(value, list):
-        return [redact_data(item, is_redaction_mode, default_private) for item in value]
-    elif isinstance(value, str):
+                return redact_data(data["value"], is_redaction_mode, default_private=False, key_context=key_context)
+        
+        # Regular dictionary
+        return {k: redact_data(v, is_redaction_mode, default_private, key_context=k) for k, v in data.items()}
+    
+    elif isinstance(data, list):
+        return [redact_data(item, is_redaction_mode, default_private, key_context=key_context) for item in data]
+    
+    elif isinstance(data, str):
         if is_redaction_mode and default_private:
-            return "REDACTED: {}".format(key.upper())
-        return value
-    return value
+            placeholder = key_context.upper() if key_context else "VALUE"
+            return f"REDACTED: {placeholder}"
+        return data
+    
+    return data
 
 def sanitize_data(data):
     """
@@ -97,11 +94,11 @@ def render_template(template_path: str, output_path: str, context: dict):
         line_statement_prefix='%%',
         line_comment_prefix='%#',
         trim_blocks=True,
-        autoescape=False,
+        lstrip_blocks=True,
     )
     
     template = env.get_template(template_file)
-    rendered = template.render(**context)
+    rendered = template.render(context)
     
     with open(output_path, 'w') as f:
         f.write(rendered)
@@ -110,16 +107,22 @@ def generate(private_path, public_path, template_path, output_path, redacted=Fal
     private_data = load_yaml(private_path)
     public_data = load_yaml(public_path)
     
-    # Apply privacy logic to both, but with different defaults
-    private_data = redact_data(private_data, is_redaction_mode=redacted, default_private=True)
-    public_data = redact_data(public_data, is_redaction_mode=redacted, default_private=False)
-        
-    full_data = {**public_data, **private_data}
+    # Process redaction
+    # Private data: default_private=True
+    # Public data: default_private=False
+    redacted_private = redact_data(private_data, is_redaction_mode=redacted, default_private=True)
+    redacted_public = redact_data(public_data, is_redaction_mode=redacted, default_private=False)
     
-    clean_data = sanitize_data(full_data)
+    # Merge data
+    context = {**redacted_public, **redacted_private}
     
-    render_template(template_path, output_path, clean_data)
+    # Sanitize for LaTeX
+    sanitized_context = sanitize_data(context)
     
+    # Render
+    render_template(template_path, output_path, sanitized_context)
+    
+    # Optional Compile
     if compile:
-        output_dir = os.path.dirname(output_path) or "."
+        output_dir = os.path.dirname(output_path)
         compile_pdf(output_path, output_dir)
