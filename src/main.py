@@ -180,8 +180,72 @@ def generate_interactive():
             elif choice == 3 or choice is None: break
             else: typer.echo("Edit/Remove coming soon!")
 
+    def edit_skills():
+        while True:
+            options = ["Add Category", "Edit Category", "Remove Category", "Back"]
+            menu = TerminalMenu(options, title="Skills (Public Data)")
+            choice = menu.show()
+            if choice == 0:
+                entry = {"category": "", "keywords": []}
+                while True:
+                    e_options = ["Category Name", "Keywords", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Add Skill Category: {entry['category'] or 'New'}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["category"] = input("Category: ")
+                    elif e_choice == 1: entry["keywords"] = input_list("Keywords")
+                    elif e_choice == 2 or e_choice is None: break
+                public_data["skills"].append(entry)
+            elif choice == 1:
+                if not public_data["skills"]:
+                    typer.echo("No skill categories to edit.")
+                    continue
+                s_options = [s["category"] for s in public_data["skills"]] + ["Back"]
+                s_menu = TerminalMenu(s_options, title="Select Category to Edit")
+                s_choice = s_menu.show()
+                if s_choice is None or s_choice == len(public_data["skills"]):
+                    continue
+                entry = public_data["skills"][s_choice]
+                while True:
+                    e_options = ["Category Name", "Keywords", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Edit Skill Category: {entry['category']}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["category"] = input("Category: ")
+                    elif e_choice == 1: entry["keywords"] = input_list("Keywords")
+                    elif e_choice == 2 or e_choice is None: break
+            elif choice == 2:
+                if not public_data["skills"]:
+                    typer.echo("No skill categories to remove.")
+                    continue
+                s_options = [s["category"] for s in public_data["skills"]] + ["Back"]
+                s_menu = TerminalMenu(s_options, title="Select Category to Remove")
+                s_choice = s_menu.show()
+                if s_choice is None or s_choice == len(public_data["skills"]):
+                    continue
+                public_data["skills"].pop(s_choice)
+            elif choice == 3 or choice is None: break
+
+    def edit_projects():
+        while True:
+            options = ["Add Project", "Edit Project", "Remove Project", "Back"]
+            menu = TerminalMenu(options, title="Projects (Public Data)")
+            choice = menu.show()
+            if choice == 0:
+                entry = {"name": "", "description": "", "url": "", "highlights": []}
+                while True:
+                    e_options = ["Project Name", "Description", "URL", "Highlights", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Add Project: {entry['name'] or 'New'}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["name"] = input("Name: ")
+                    elif e_choice == 1: entry["description"] = input("Description: ")
+                    elif e_choice == 2: entry["url"] = input("URL: ")
+                    elif e_choice == 3: entry["highlights"] = input_list("Highlights")
+                    elif e_choice == 4 or e_choice is None: break
+                public_data["projects"].append(entry)
+            elif choice == 3 or choice is None: break
+            else: typer.echo("Edit/Remove coming soon!")
+
     while True:
-        main_options = ["Basics", "Work Experience (Public)", "Education (Public)", "Save and Exit", "Exit without Saving"]
+        main_options = ["Basics", "Work Experience (Public)", "Education (Public)", "Skills (Public)", "Projects (Public)", "Save and Exit", "Exit without Saving"]
         main_menu = TerminalMenu(main_options, title="Main Menu")
         main_choice = main_menu.show()
 
@@ -192,13 +256,17 @@ def generate_interactive():
         elif main_choice == 2:
             edit_education()
         elif main_choice == 3:
+            edit_skills()
+        elif main_choice == 4:
+            edit_projects()
+        elif main_choice == 5:
             with open("draft_private.yaml", "w") as f:
                 yaml.dump(private_data, f)
             with open("draft_public.yaml", "w") as f:
                 yaml.dump(public_data, f)
             typer.echo("Saved interactive drafts to draft_private.yaml and draft_public.yaml")
             break
-        elif main_choice == 4 or main_choice is None:
+        elif main_choice == 6 or main_choice is None:
             break
         else:
             typer.echo("Feature coming soon!")
