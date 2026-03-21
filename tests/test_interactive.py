@@ -26,19 +26,24 @@ class TestInteractiveCLI(unittest.TestCase):
         mock_instance = MagicMock()
         mock_menu.return_value = mock_instance
         # Mocking menu selections:
-        # 1. Main menu: "Basics"
-        # 2. Basics menu: "Name"
-        # 3. Basics menu: "Back"
-        # 4. Main menu: "Save and Exit"
-        mock_instance.show.side_effect = [0, 0, 1, 1] 
+        # Loop 1:
+        #   Main menu: 0 (Basics)
+        #     Basics menu: 0 (Name) -> input()
+        #     Basics menu: 5 (Back)
+        # Loop 2:
+        #   Main menu: 3 (Save and Exit)
+        mock_instance.show.side_effect = [0, 0, 5, 3] 
         
         # Mocking user input for "Name"
         mock_input.return_value = "John Doe"
 
         # Execute command
         # Note: We might need to ensure src is in PYTHONPATH or use relative imports
-        result = self.runner.invoke(app, ["generate-interactive"])
+        result = self.runner.invoke(app, ["generate-interactive"], catch_exceptions=False)
 
+        if result.exit_code != 0:
+            print(result.stdout)
+            print(result.stderr)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Saved interactive drafts", result.stdout)
 
