@@ -9,7 +9,7 @@
 2. **Phase Checkpoint**
    - [x] Task: Conductor - User Manual Verification 'Foundation & Data Management' [7fa8062] (Protocol in workflow.md)
 
-## Phase 2: Expanded Input Flows (Work & Education)
+## Phase 2: Expanded Input Flows (Work & Education) [checkpoint: 7bff860]
 
 1. **Work Experience Section**
    - [x] Task: Write failing tests for the `Work Experience` input flow (multiple entries, nested bullet points). [c3cab54]
@@ -18,7 +18,7 @@
    - [x] Task: Write failing tests for the `Education` input flow (honors and courses lists). [c3cab54]
    - [x] Task: Implement the `Education` menu with list handling. [c3cab54]
 3. **Phase Checkpoint**
-   - [ ] Task: Conductor - User Manual Verification 'Work & Education Flows' (Protocol in workflow.md)
+   - [x] Task: Conductor - User Manual Verification 'Work & Education Flows' [7bff860] (Protocol in workflow.md)
 
 ## Phase 3: Expanded Input Flows (Skills & Projects)
 
