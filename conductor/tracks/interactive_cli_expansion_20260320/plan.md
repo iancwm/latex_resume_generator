@@ -3,9 +3,9 @@
 ## Phase 1: Foundation & Data Management
 
 1. **File Loading & Persistence**
-   - [ ] Task: Write failing tests for loading existing `public.yaml` and `private.yaml` in the interactive session.
-   - [ ] Task: Implement logic to load existing YAML data into the session's internal state.
-   - [ ] Task: Update the `Save and Exit` logic to preserve existing data and save to `draft_public.yaml`/`draft_private.yaml`.
+   - [x] Task: Write failing tests for loading existing `public.yaml` and `private.yaml` in the interactive session. [cfd0229]
+   - [x] Task: Implement logic to load existing YAML data into the session's internal state. [cfd0229]
+   - [x] Task: Update the `Save and Exit` logic to preserve existing data and save to `draft_public.yaml`/`draft_private.yaml`. [cfd0229]
 2. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Foundation & Data Management' (Protocol in workflow.md)
 
