@@ -241,8 +241,36 @@ def generate_interactive():
                     elif e_choice == 3: entry["highlights"] = input_list("Highlights")
                     elif e_choice == 4 or e_choice is None: break
                 public_data["projects"].append(entry)
+            elif choice == 1:
+                if not public_data["projects"]:
+                    typer.echo("No projects to edit.")
+                    continue
+                p_options = [p["name"] for p in public_data["projects"]] + ["Back"]
+                p_menu = TerminalMenu(p_options, title="Select Project to Edit")
+                p_choice = p_menu.show()
+                if p_choice is None or p_choice == len(public_data["projects"]):
+                    continue
+                entry = public_data["projects"][p_choice]
+                while True:
+                    e_options = ["Project Name", "Description", "URL", "Highlights", "Back"]
+                    e_menu = TerminalMenu(e_options, title=f"Edit Project: {entry['name']}")
+                    e_choice = e_menu.show()
+                    if e_choice == 0: entry["name"] = input("Name: ")
+                    elif e_choice == 1: entry["description"] = input("Description: ")
+                    elif e_choice == 2: entry["url"] = input("URL: ")
+                    elif e_choice == 3: entry["highlights"] = input_list("Highlights")
+                    elif e_choice == 4 or e_choice is None: break
+            elif choice == 2:
+                if not public_data["projects"]:
+                    typer.echo("No projects to remove.")
+                    continue
+                p_options = [p["name"] for p in public_data["projects"]] + ["Back"]
+                p_menu = TerminalMenu(p_options, title="Select Project to Remove")
+                p_choice = p_menu.show()
+                if p_choice is None or p_choice == len(public_data["projects"]):
+                    continue
+                public_data["projects"].pop(p_choice)
             elif choice == 3 or choice is None: break
-            else: typer.echo("Edit/Remove coming soon!")
 
     while True:
         main_options = ["Basics", "Work Experience (Public)", "Education (Public)", "Skills (Public)", "Projects (Public)", "Save and Exit", "Exit without Saving"]
