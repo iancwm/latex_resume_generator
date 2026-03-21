@@ -65,7 +65,7 @@ class TestInteractiveProjectsManagement(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         
         # Verify changes in draft_public.yaml
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(data["projects"][0]["name"], "New Project")
             self.assertEqual(data["projects"][0]["highlights"], ["New Highlight 1", "New Highlight 2"])
@@ -93,7 +93,7 @@ class TestInteractiveProjectsManagement(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         
         # Verify removal in draft_public.yaml
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(len(data["projects"]), 0)
 

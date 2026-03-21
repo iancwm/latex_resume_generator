@@ -56,7 +56,7 @@ class TestInteractiveSkillsProjects(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(data["skills"][0]["category"], "Technical")
             self.assertEqual(data["skills"][0]["keywords"], ["Python", "LaTeX"])

@@ -34,11 +34,15 @@
 ## Phase 4: Validation & Consistency
 
 1. **Input Validation Logic**
-   - [~] Task: Write failing tests for date format (`YYYY-MM`) and required field validation.
-   - [ ] Task: Implement reusable validation helpers in `src/main.py`.
-   - [ ] Task: Integrate validation into the interactive input prompts.
+   - [x] Task: Write failing tests for date format (`YYYY-MM`) and required field validation. [73801f1]
+   - [x] Task: Implement reusable validation helpers in `src/main.py`. [73801f1]
+   - [x] Task: Integrate validation into the interactive input prompts. [73801f1]
 2. **Bullet Point Consistency Check**
-   - [ ] Task: Write failing tests for bullet point period consistency across lists.
-   - [ ] Task: Implement a post-input check for list punctuation consistency.
-3. **Phase Checkpoint**
+   - [x] Task: Write failing tests for bullet point period consistency across lists. [df99201]
+   - [x] Task: Implement a post-input check for list punctuation consistency. [df99201]
+3. **Enhanced Draft Management**
+   - [~] Task: Implement deep merge logic for loading existing YAML data.
+   - [ ] Task: Update save logic to use `drafts/` folder and append user's first name to filenames.
+   - [ ] Task: Write tests for deep merging and renamed draft files.
+4. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Validation & Consistency' (Protocol in workflow.md)

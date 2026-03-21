@@ -35,7 +35,7 @@ class TestInteractiveEducation(unittest.TestCase):
             6, # Entry Edit Menu -> Honors
             8, # Entry Edit Menu -> Back
             3, # Education Menu -> Back
-            3  # Main Menu -> Save and Exit
+            5  # Main Menu -> Save and Exit
         ]
 
         mock_input.side_effect = [
@@ -49,7 +49,7 @@ class TestInteractiveEducation(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(len(data["education"]), 1)
             self.assertEqual(data["education"][0]["institution"], "Harvard")

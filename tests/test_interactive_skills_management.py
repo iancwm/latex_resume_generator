@@ -58,7 +58,7 @@ class TestInteractiveSkillsManagement(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         
         # Verify changes in draft_public.yaml
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(data["skills"][0]["keywords"], ["Python", "Rust", "Go"])
 
@@ -84,9 +84,48 @@ class TestInteractiveSkillsManagement(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         
         # Verify removal in draft_public.yaml
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(len(data["skills"]), 0)
+
+    @patch('src.main.TerminalMenu')
+    def test_edit_non_existent_skill(self, mock_menu):
+        """Test editing when no skill categories exist."""
+        # Start with empty public.yaml
+        with open("inputs/public.yaml", "w") as f:
+            yaml.dump({"skills": []}, f)
+            
+        mock_instance = MagicMock()
+        mock_menu.return_value = mock_instance
+        
+        # 1. Main Menu -> Skills (3)
+        # 2. Skills Menu -> Edit Category (1) -> Shows "No skill categories to edit."
+        # 3. Skills Menu -> Back (3)
+        # 4. Main Menu -> Exit (6)
+        mock_instance.show.side_effect = [3, 1, 3, 6]
+        
+        result = self.runner.invoke(app, ["generate-interactive"], catch_exceptions=False)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("No skill categories to edit.", result.stdout)
+
+    @patch('src.main.TerminalMenu')
+    def test_remove_non_existent_skill(self, mock_menu):
+        """Test removing when no skill categories exist."""
+        with open("inputs/public.yaml", "w") as f:
+            yaml.dump({"skills": []}, f)
+            
+        mock_instance = MagicMock()
+        mock_menu.return_value = mock_instance
+        
+        # 1. Main Menu -> Skills (3)
+        # 2. Skills Menu -> Remove Category (2) -> Shows "No skill categories to remove."
+        # 3. Skills Menu -> Back (3)
+        # 4. Main Menu -> Exit (6)
+        mock_instance.show.side_effect = [3, 2, 3, 6]
+        
+        result = self.runner.invoke(app, ["generate-interactive"], catch_exceptions=False)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("No skill categories to remove.", result.stdout)
 
 if __name__ == '__main__':
     unittest.main()

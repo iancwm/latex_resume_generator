@@ -42,7 +42,7 @@ class TestInteractiveWork(unittest.TestCase):
             5, # 5. Entry Edit Menu -> Summary
             6, # 6. Entry Edit Menu -> Back
             3, # 7. Work Menu -> Back (Wait, Work Menu has 4 options, Back is index 3)
-            3  # 8. Main Menu -> Save and Exit
+            5  # 8. Main Menu -> Save and Exit
         ]
 
         mock_input.side_effect = [
@@ -58,7 +58,7 @@ class TestInteractiveWork(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Saved interactive drafts", result.stdout)
 
-        with open("draft_public.yaml", "r") as f:
+        with open("drafts/public_anonymous.yaml", "r") as f:
             data = yaml.safe_load(f)
             self.assertEqual(len(data["work"]), 1)
             self.assertEqual(data["work"][0]["company"], "New Corp")
