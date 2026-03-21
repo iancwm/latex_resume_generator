@@ -14,8 +14,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Configuration Driven Templates' [fc96f72] (Protocol in workflow.md)
 
 ## Phase 3: Interactive CLI Tool
-- [ ] Task: Add `simple-term-menu` to dependencies and update `requirements.txt`.
-- [ ] Task: Write failing tests for the `generate-interactive` Typer command and data saving logic (mocking prompts).
+- [x] Task: Add `simple-term-menu` to dependencies and update `requirements.txt`. [94d2d1b]
+- [~] Task: Write failing tests for the `generate-interactive` Typer command and data saving logic (mocking prompts).
 - [ ] Task: Implement the Typer command `generate-interactive` in `src/main.py`.
 - [ ] Task: Implement the interactive input workflow using `simple-term-menu`.
 - [ ] Task: Implement logic to save the inputs to `draft_public.yaml` and `draft_private.yaml`.
