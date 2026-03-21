@@ -12,11 +12,11 @@
 ## Phase 2: Expanded Input Flows (Work & Education)
 
 1. **Work Experience Section**
-   - [ ] Task: Write failing tests for the `Work Experience` input flow (multiple entries, nested bullet points).
-   - [ ] Task: Implement the `Work Experience` menu with list handling (sentinel values for bullet points).
+   - [x] Task: Write failing tests for the `Work Experience` input flow (multiple entries, nested bullet points). [c3cab54]
+   - [x] Task: Implement the `Work Experience` menu with list handling (sentinel values for bullet points). [c3cab54]
 2. **Education Section**
-   - [ ] Task: Write failing tests for the `Education` input flow (honors and courses lists).
-   - [ ] Task: Implement the `Education` menu with list handling.
+   - [x] Task: Write failing tests for the `Education` input flow (honors and courses lists). [c3cab54]
+   - [x] Task: Implement the `Education` menu with list handling. [c3cab54]
 3. **Phase Checkpoint**
    - [ ] Task: Conductor - User Manual Verification 'Work & Education Flows' (Protocol in workflow.md)
 
