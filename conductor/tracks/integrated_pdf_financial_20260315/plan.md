@@ -31,11 +31,11 @@
 3. **Phase Checkpoint**
    - [x] Task: Conductor - User Manual Verification 'Enhanced Privacy Overrides' [30d6f19] (Protocol in workflow.md)
 
-## Phase 4: Final Integration & Cleanup
+## Phase 4: Final Integration & Cleanup [checkpoint: 79c2af3]
 
 1. **Integration Test**
-   - [ ] Task: Run full generation pipeline for a financial resume with redaction and PDF compilation
+   - [x] Task: Run full generation pipeline for a financial resume with redaction and PDF compilation [7c9793f]
 2. **Documentation**
-   - [ ] Task: Update `README.md` to reflect the new `--compile` flag and `financial` template
+   - [x] Task: Update `README.md` to reflect the new `--compile` flag and `financial` template [02d4f23]
 3. **Phase Checkpoint**
-   - [ ] Task: Conductor - User Manual Verification 'Final Integration & Cleanup' (Protocol in workflow.md)
+   - [x] Task: Conductor - User Manual Verification 'Final Integration & Cleanup' [79c2af3] (Protocol in workflow.md)
