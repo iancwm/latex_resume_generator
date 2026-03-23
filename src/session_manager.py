@@ -93,12 +93,87 @@ class SessionManager:
     def exists(self, session_id):
         """
         Check if a session exists.
-        
+
         Args:
             session_id: Unique identifier for the session
-            
+
         Returns:
             True if session exists, False otherwise
         """
         file_path = self._session_path(session_id)
         return os.path.exists(file_path)
+
+    def list_sessions(self):
+        """
+        List all available session names.
+
+        Returns:
+            Sorted list of session names (excludes .tmp.* files)
+        """
+        sessions = []
+
+        if not os.path.exists(self.sessions_dir):
+            return sessions
+
+        for filename in os.listdir(self.sessions_dir):
+            # Skip .tmp.* files (incomplete saves)
+            if filename.startswith(".tmp."):
+                continue
+
+            # Extract session name from filename (remove .yaml extension)
+            if filename.endswith(".yaml"):
+                session_name = filename[:-5]  # Remove ".yaml"
+                sessions.append(session_name)
+
+        return sorted(sessions)
+
+    def delete(self, session_id):
+        """
+        Delete a session.
+
+        Args:
+            session_id: Unique identifier for the session to delete
+        """
+        file_path = self._session_path(session_id)
+
+        if os.path.exists(file_path):
+            os.unlink(file_path)
+
+    def get_recent_sessions(self, hours=24):
+        """
+        Get sessions modified within the specified time window.
+
+        Args:
+            hours: Time window in hours (default: 24)
+
+        Returns:
+            List of (name, mtime) tuples sorted by mtime descending
+        """
+        import time
+
+        recent = []
+        cutoff_time = time.time() - (hours * 3600)
+
+        if not os.path.exists(self.sessions_dir):
+            return recent
+
+        for filename in os.listdir(self.sessions_dir):
+            # Skip .tmp.* files (incomplete saves)
+            if filename.startswith(".tmp."):
+                continue
+
+            # Only process .yaml files
+            if filename.endswith(".yaml"):
+                file_path = os.path.join(self.sessions_dir, filename)
+                file_stat = os.stat(file_path)
+                mtime = file_stat.st_mtime
+
+                # Only include sessions within the time window
+                if mtime >= cutoff_time:
+                    session_name = filename[:-5]  # Remove ".yaml"
+                    recent.append((session_name, mtime))
+
+        # Sort by mtime descending (most recent first)
+        recent.sort(key=lambda x: x[1], reverse=True)
+
+        return recent
