@@ -222,6 +222,40 @@ class EducationChanged(Message):
         self.is_valid = is_valid
 
 
+class SkillsChanged(Message):
+    """
+    Message posted when a skill category form field is changed.
+
+    Attributes:
+        entry_index: The index of the skill category being edited
+        field_name: The name of the field that changed
+        value: The new value of the field
+        is_valid: Whether the new value passes validation
+    """
+
+    def __init__(
+        self,
+        entry_index: int,
+        field_name: str,
+        value: str,
+        is_valid: bool = True,
+    ):
+        """
+        Initialize a SkillsChanged message.
+
+        Args:
+            entry_index: The index of the skill category being edited
+            field_name: The name of the field that changed
+            value: The new value of the field
+            is_valid: Whether the value passes validation
+        """
+        super().__init__()
+        self.entry_index = entry_index
+        self.field_name = field_name
+        self.value = value
+        self.is_valid = is_valid
+
+
 class WorkEntryForm(Container):
     """
     Form for editing a single work experience entry.
@@ -599,6 +633,166 @@ class EducationEntryForm(Container):
         # Post message to notify parent of the change
         self.post_message(
             EducationChanged(
+                entry_index=self.entry_index,
+                field_name=field_name,
+                value=value,
+                is_valid=is_valid,
+            )
+        )
+
+
+class SkillCategoryForm(Container):
+    """
+    Form for editing a single skill category entry.
+
+    Provides labeled input fields for category name and keywords
+    (comma-separated). Posts SkillsChanged messages when fields are modified.
+    """
+
+    DEFAULT_CSS = """
+    SkillCategoryForm {
+        layout: vertical;
+        padding: 1;
+        margin-bottom: 1;
+        background: $surface;
+        border: solid $primary;
+    }
+
+    SkillCategoryForm .form-row {
+        layout: horizontal;
+        margin-bottom: 1;
+    }
+
+    SkillCategoryForm .form-row FormField {
+        width: 1fr;
+        margin-right: 1;
+        margin-bottom: 0;
+    }
+
+    SkillCategoryForm .form-row FormField:last-child {
+        margin-right: 0;
+    }
+
+    SkillCategoryForm .error-message {
+        color: $error;
+        text-style: italic;
+        margin-bottom: 1;
+    }
+    """
+
+    def __init__(
+        self,
+        entry: dict = None,
+        entry_index: int = 0,
+        **kwargs,
+    ):
+        """
+        Initialize a SkillCategoryForm widget.
+
+        Args:
+            entry: Dictionary containing skill category data
+            entry_index: Index of this entry in the skills list
+            **kwargs: Additional keyword arguments for Container
+        """
+        super().__init__(**kwargs)
+        self.entry = entry or {}
+        self.entry_index = entry_index
+        self._validation_errors = {}
+
+    def compose(self) -> ComposeResult:
+        """Compose the skill category form layout."""
+        # First row: Category Name
+        yield FormField(
+            field_name="category",
+            label="Category Name",
+            value=self.entry.get("category", ""),
+            placeholder="e.g., Programming Languages",
+            id=f"skill-{self.entry_index}-category",
+        )
+
+        # Second row: Keywords (comma-separated)
+        # Convert list to comma-separated string for display
+        keywords_list = self.entry.get("keywords", [])
+        keywords_str = ", ".join(keywords_list) if keywords_list else ""
+        yield FormField(
+            field_name="keywords",
+            label="Keywords",
+            value=keywords_str,
+            placeholder="e.g., Python, Java, Go",
+            id=f"skill-{self.entry_index}-keywords",
+        )
+
+        # Error message display (hidden by default)
+        yield Static("", id=f"skill-{self.entry_index}-errors", classes="error-message")
+
+    def on_mount(self) -> None:
+        """Handle widget mount."""
+        self._update_error_display()
+
+    def _validate_field(self, field_name: str, value: str) -> bool:
+        """
+        Validate a field value.
+
+        Args:
+            field_name: Name of the field to validate
+            value: Value to validate
+
+        Returns:
+            True if valid, False otherwise
+        """
+        from src.validators import validate_required
+
+        # Category name is required
+        if field_name == "category":
+            return validate_required(value, field_name)
+
+        # Keywords are optional
+        return True
+
+    def _update_error_display(self) -> None:
+        """Update the error message display."""
+        try:
+            error_widget = self.query_one(f"#skill-{self.entry_index}-errors", Static)
+            if self._validation_errors:
+                errors = list(self._validation_errors.values())
+                error_widget.update(" • ".join(errors))
+                error_widget.display = True
+            else:
+                error_widget.display = False
+        except Exception:
+            # Widget may not be ready yet
+            pass
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        """
+        Handle input field changes.
+
+        Args:
+            event: Input changed event
+        """
+        # Extract field name from input ID
+        input_id = event.input.id
+        if not input_id or not input_id.startswith(f"skill-{self.entry_index}-"):
+            return
+
+        field_name = input_id.replace(f"skill-{self.entry_index}-", "")
+        value = event.value
+
+        # Validate the field
+        is_valid = self._validate_field(field_name, value)
+
+        # Update validation errors
+        if is_valid and field_name in self._validation_errors:
+            del self._validation_errors[field_name]
+        elif not is_valid:
+            if field_name == "category":
+                self._validation_errors[field_name] = "Category name is required"
+
+        self._update_error_display()
+
+        # Post message to notify parent of the change
+        self.post_message(
+            SkillsChanged(
                 entry_index=self.entry_index,
                 field_name=field_name,
                 value=value,

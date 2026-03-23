@@ -21,6 +21,8 @@ from src.tui_widgets import (
     EducationChanged,
     BasicsForm,
     BasicsChanged,
+    SkillCategoryForm,
+    SkillsChanged,
 )
 
 
@@ -91,6 +93,8 @@ class ResumeEditorApp(App):
                 ScrollableContainer(id="education-forms-container"),
                 Static("Work Experience", classes="pane-title"),
                 ScrollableContainer(id="work-forms-container"),
+                Static("Skills", classes="pane-title"),
+                ScrollableContainer(id="skills-forms-container"),
                 id="left-pane",
             ),
             Vertical(
@@ -121,6 +125,9 @@ class ResumeEditorApp(App):
 
         # Create work entry forms
         self._create_work_entry_forms()
+
+        # Create skill category forms
+        self._create_skill_category_forms()
 
         # Update YAML preview with current data
         self.update_yaml_preview()
@@ -167,6 +174,30 @@ class ResumeEditorApp(App):
             # Create a form for each education entry
             for i, entry in enumerate(education_entries):
                 form = EducationEntryForm(entry=entry, entry_index=i, id=f"edu-form-{i}")
+                container.mount(form)
+
+        except Exception:
+            # Container may not be ready yet
+            pass
+
+    def _create_skill_category_forms(self) -> None:
+        """Create SkillCategoryForm widgets for each skill category in current_data."""
+        try:
+            container = self.query_one("#skills-forms-container", ScrollableContainer)
+            # Clear existing forms
+            container.remove_children()
+
+            # Get skill categories from current_data
+            skills_entries = self.current_data.get("skills", [])
+
+            # If no skill entries exist, create an empty one
+            if not skills_entries:
+                skills_entries = [{}]
+                self.current_data["skills"] = skills_entries
+
+            # Create a form for each skill category
+            for i, entry in enumerate(skills_entries):
+                form = SkillCategoryForm(entry=entry, entry_index=i, id=f"skill-form-{i}")
                 container.mount(form)
 
         except Exception:
@@ -297,6 +328,50 @@ class ResumeEditorApp(App):
         # Update or remove the field based on value
         if message.value.strip():
             entry[yaml_key] = message.value
+        elif yaml_key in entry:
+            del entry[yaml_key]
+
+        # Update YAML preview
+        self.update_yaml_preview()
+
+    def on_skills_changed(self, message: SkillsChanged) -> None:
+        """
+        Handle skill category field changes.
+
+        Args:
+            message: SkillsChanged message containing field update info
+        """
+        # Ensure skills list exists
+        if "skills" not in self.current_data:
+            self.current_data["skills"] = []
+
+        # Ensure the entry exists in the list
+        skills_list = self.current_data["skills"]
+        while len(skills_list) <= message.entry_index:
+            skills_list.append({})
+
+        # Update the field in current_data
+        entry = skills_list[message.entry_index]
+
+        # Map field names to YAML keys
+        field_to_key = {
+            "category": "category",
+            "keywords": "keywords",
+        }
+
+        yaml_key = field_to_key.get(message.field_name, message.field_name)
+
+        # Update or remove the field based on value
+        if message.value.strip():
+            # Special handling for keywords: convert comma-separated string to list
+            if yaml_key == "keywords":
+                keywords_list = [kw.strip() for kw in message.value.split(",") if kw.strip()]
+                if keywords_list:
+                    entry[yaml_key] = keywords_list
+                elif yaml_key in entry:
+                    del entry[yaml_key]
+            else:
+                entry[yaml_key] = message.value
         elif yaml_key in entry:
             del entry[yaml_key]
 
