@@ -5,6 +5,7 @@ Provides a Textual-based TUI with split panes for editing resume data
 and viewing live YAML preview.
 """
 
+import copy
 import yaml
 import requests
 
@@ -13,6 +14,7 @@ from textual.containers import Container, ScrollableContainer, Vertical
 from textual.widgets import Header, Footer, Static
 
 from src.session_manager import SessionManager
+from src.undo_manager import UndoManager
 from src.tui_widgets import (
     YAMLPreview,
     WorkEntryForm,
@@ -34,6 +36,14 @@ class ResumeEditorApp(App):
     BINDINGS = [
         ("ctrl+s", "save", "Save"),
         ("ctrl+q", "quit", "Quit"),
+        ("ctrl+p", "toggle_preview", "Preview"),
+        ("ctrl+z", "undo", "Undo"),
+        ("ctrl+y", "redo", "Redo"),
+        ("ctrl+1", "jump_basics", "Basics"),
+        ("ctrl+2", "jump_work", "Work"),
+        ("ctrl+3", "jump_education", "Education"),
+        ("ctrl+4", "jump_skills", "Skills"),
+        ("ctrl+5", "jump_projects", "Projects"),
     ]
 
     CSS = """
@@ -82,6 +92,7 @@ class ResumeEditorApp(App):
         self.session_name = session_name
         self.sub_title = f"Session: {session_name}"
         self.session_manager = SessionManager()
+        self.undo_manager = UndoManager()
         self.current_data = {}
 
     def compose(self) -> ComposeResult:
@@ -120,6 +131,9 @@ class ResumeEditorApp(App):
         else:
             # Initialize empty structure for new session
             self.current_data = {}
+
+        # Set initial state for undo manager
+        self.undo_manager.set_initial_state(copy.deepcopy(self.current_data))
 
         # Initialize basics form with current data
         self._update_basics_form()
@@ -262,6 +276,9 @@ class ResumeEditorApp(App):
         Args:
             message: BasicsChanged message containing field update info
         """
+        # Push current state to undo manager before making changes
+        self.undo_manager.push_state(copy.deepcopy(self.current_data))
+
         # Ensure basics dict exists
         if "basics" not in self.current_data:
             self.current_data["basics"] = {}
@@ -293,6 +310,9 @@ class ResumeEditorApp(App):
         Args:
             message: WorkEntryChanged message containing field update info
         """
+        # Push current state to undo manager before making changes
+        self.undo_manager.push_state(copy.deepcopy(self.current_data))
+
         # Ensure work list exists
         if "work" not in self.current_data:
             self.current_data["work"] = []
@@ -332,6 +352,9 @@ class ResumeEditorApp(App):
         Args:
             message: EducationChanged message containing field update info
         """
+        # Push current state to undo manager before making changes
+        self.undo_manager.push_state(copy.deepcopy(self.current_data))
+
         # Ensure education list exists
         if "education" not in self.current_data:
             self.current_data["education"] = []
@@ -372,6 +395,9 @@ class ResumeEditorApp(App):
         Args:
             message: SkillsChanged message containing field update info
         """
+        # Push current state to undo manager before making changes
+        self.undo_manager.push_state(copy.deepcopy(self.current_data))
+
         # Ensure skills list exists
         if "skills" not in self.current_data:
             self.current_data["skills"] = []
@@ -416,6 +442,9 @@ class ResumeEditorApp(App):
         Args:
             message: ProjectsChanged message containing field update info
         """
+        # Push current state to undo manager before making changes
+        self.undo_manager.push_state(copy.deepcopy(self.current_data))
+
         # Ensure projects list exists
         if "projects" not in self.current_data:
             self.current_data["projects"] = []
@@ -508,6 +537,106 @@ class ResumeEditorApp(App):
         """Save session and trigger compile."""
         self.save_session()
         self._trigger_compile()
+
+    def action_toggle_preview(self) -> None:
+        """Open preview in browser."""
+        import webbrowser
+        webbrowser.open("http://localhost:8000/preview")
+        self.notify("Preview opened in browser")
+
+    def action_undo(self) -> None:
+        """Undo last edit."""
+        previous_state = self.undo_manager.undo()
+        if previous_state is not None:
+            self.current_data = previous_state
+            # Update all forms with the undone state
+            self._update_basics_form()
+            self._create_education_entry_forms()
+            self._create_work_entry_forms()
+            self._create_skill_category_forms()
+            self._create_project_entry_forms()
+            self.update_yaml_preview()
+            self.notify("Undo successful")
+        else:
+            self.notify("Nothing to undo")
+
+    def action_redo(self) -> None:
+        """Redo last undone edit."""
+        next_state = self.undo_manager.redo()
+        if next_state is not None:
+            self.current_data = next_state
+            # Update all forms with the redone state
+            self._update_basics_form()
+            self._create_education_entry_forms()
+            self._create_work_entry_forms()
+            self._create_skill_category_forms()
+            self._create_project_entry_forms()
+            self.update_yaml_preview()
+            self.notify("Redo successful")
+        else:
+            self.notify("Nothing to redo")
+
+    def action_jump_basics(self) -> None:
+        """Scroll to Basics section."""
+        try:
+            basics_form = self.query_one("#basics-form", BasicsForm)
+            basics_form.scroll_visible()
+            basics_form.focus()
+            self.notify("Jumped to Basics section")
+        except Exception:
+            self.notify("Could not jump to Basics section")
+
+    def action_jump_work(self) -> None:
+        """Scroll to Work section."""
+        try:
+            container = self.query_one("#work-forms-container", ScrollableContainer)
+            container.scroll_visible()
+            # Focus first work form if available
+            work_form = self.query_one("#work-form-0", WorkEntryForm)
+            if work_form:
+                work_form.focus()
+            self.notify("Jumped to Work section")
+        except Exception:
+            self.notify("Could not jump to Work section")
+
+    def action_jump_education(self) -> None:
+        """Scroll to Education section."""
+        try:
+            container = self.query_one("#education-forms-container", ScrollableContainer)
+            container.scroll_visible()
+            # Focus first education form if available
+            edu_form = self.query_one("#edu-form-0", EducationEntryForm)
+            if edu_form:
+                edu_form.focus()
+            self.notify("Jumped to Education section")
+        except Exception:
+            self.notify("Could not jump to Education section")
+
+    def action_jump_skills(self) -> None:
+        """Scroll to Skills section."""
+        try:
+            container = self.query_one("#skills-forms-container", ScrollableContainer)
+            container.scroll_visible()
+            # Focus first skill form if available
+            skill_form = self.query_one("#skill-form-0", SkillCategoryForm)
+            if skill_form:
+                skill_form.focus()
+            self.notify("Jumped to Skills section")
+        except Exception:
+            self.notify("Could not jump to Skills section")
+
+    def action_jump_projects(self) -> None:
+        """Scroll to Projects section."""
+        try:
+            container = self.query_one("#projects-forms-container", ScrollableContainer)
+            container.scroll_visible()
+            # Focus first project form if available
+            project_form = self.query_one("#project-form-0", ProjectEntryForm)
+            if project_form:
+                project_form.focus()
+            self.notify("Jumped to Projects section")
+        except Exception:
+            self.notify("Could not jump to Projects section")
 
 
 def run_editor(session_name: str = "default") -> None:
