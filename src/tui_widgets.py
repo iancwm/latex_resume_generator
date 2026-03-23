@@ -59,17 +59,17 @@ class FormField(Widget):
         self.label_text = label
         self._initial_value = value
         self._placeholder = placeholder
+        # Parent widget should not take focus, only the Input should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the form field layout."""
         yield Label(self.label_text, id=f"label-{self.field_name}")
-        input_widget = Input(
+        yield Input(
             value=self._initial_value,
             placeholder=self._placeholder,
             id=f"input-{self.field_name}",
         )
-        input_widget.can_focus = True
-        yield input_widget
 
     def get_value(self) -> str:
         """
@@ -349,6 +349,8 @@ class WorkEntryForm(Container):
         self.entry = entry or {}
         self.entry_index = entry_index
         self._validation_errors = {}
+        # Container should not take focus, only child Inputs should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the work entry form layout."""
@@ -537,6 +539,8 @@ class EducationEntryForm(Container):
         self.entry = entry or {}
         self.entry_index = entry_index
         self._validation_errors = {}
+        # Container should not take focus, only child Inputs should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the education entry form layout."""
@@ -734,6 +738,8 @@ class SkillCategoryForm(Container):
         self.entry = entry or {}
         self.entry_index = entry_index
         self._validation_errors = {}
+        # Container should not take focus, only child Inputs should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the skill category form layout."""
@@ -895,6 +901,8 @@ class ProjectEntryForm(Container):
         self.entry = entry or {}
         self.entry_index = entry_index
         self._validation_errors = {}
+        # Container should not take focus, only child Inputs should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the project entry form layout."""
@@ -1063,6 +1071,8 @@ class BasicsForm(Container):
         """
         super().__init__(**kwargs)
         self.basics = basics or {}
+        # Container should not take focus, only child Inputs should
+        self.can_focus = False
 
     def compose(self) -> ComposeResult:
         """Compose the basics form layout."""
