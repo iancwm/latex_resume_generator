@@ -8,11 +8,11 @@ and viewing live YAML preview.
 import yaml
 
 from textual.app import App, ComposeResult
-from textual.containers import Container, Vertical
+from textual.containers import Container, ScrollableContainer, Vertical
 from textual.widgets import Header, Footer, Static
 
 from src.session_manager import SessionManager
-from src.tui_widgets import YAMLPreview
+from src.tui_widgets import YAMLPreview, WorkEntryForm, WorkEntryChanged
 
 
 class ResumeEditorApp(App):
@@ -71,8 +71,8 @@ class ResumeEditorApp(App):
         yield Header()
         yield Container(
             Vertical(
-                Static("Form Editor", classes="pane-title"),
-                Static("[Form Editor - Coming Soon]", id="form-editor-content"),
+                Static("Work Experience", classes="pane-title"),
+                ScrollableContainer(id="work-forms-container"),
                 id="left-pane",
             ),
             Vertical(
@@ -85,7 +85,7 @@ class ResumeEditorApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        """Load session data on mount."""
+        """Load session data on mount and create work entry forms."""
         # Try to load existing session data
         loaded_data = self.session_manager.load(self.session_name)
 
@@ -95,7 +95,73 @@ class ResumeEditorApp(App):
             # Initialize empty structure for new session
             self.current_data = {}
 
+        # Create work entry forms
+        self._create_work_entry_forms()
+
         # Update YAML preview with current data
+        self.update_yaml_preview()
+
+    def _create_work_entry_forms(self) -> None:
+        """Create WorkEntryForm widgets for each work entry in current_data."""
+        try:
+            container = self.query_one("#work-forms-container", ScrollableContainer)
+            # Clear existing forms
+            container.remove_children()
+
+            # Get work entries from current_data
+            work_entries = self.current_data.get("work", [])
+
+            # If no work entries exist, create an empty one
+            if not work_entries:
+                work_entries = [{}]
+                self.current_data["work"] = work_entries
+
+            # Create a form for each work entry
+            for i, entry in enumerate(work_entries):
+                form = WorkEntryForm(entry=entry, entry_index=i, id=f"work-form-{i}")
+                container.mount(form)
+
+        except Exception:
+            # Container may not be ready yet
+            pass
+
+    def on_work_entry_changed(self, message: WorkEntryChanged) -> None:
+        """
+        Handle work entry field changes.
+
+        Args:
+            message: WorkEntryChanged message containing field update info
+        """
+        # Ensure work list exists
+        if "work" not in self.current_data:
+            self.current_data["work"] = []
+
+        # Ensure the entry exists in the list
+        work_list = self.current_data["work"]
+        while len(work_list) <= message.entry_index:
+            work_list.append({})
+
+        # Update the field in current_data
+        entry = work_list[message.entry_index]
+
+        # Map field names to YAML keys
+        field_to_key = {
+            "company": "company",
+            "position": "position",
+            "location": "location",
+            "start_date": "startDate",
+            "end_date": "endDate",
+        }
+
+        yaml_key = field_to_key.get(message.field_name, message.field_name)
+
+        # Update or remove the field based on value
+        if message.value.strip():
+            entry[yaml_key] = message.value
+        elif yaml_key in entry:
+            del entry[yaml_key]
+
+        # Update YAML preview
         self.update_yaml_preview()
 
     def update_yaml_preview(self) -> None:
