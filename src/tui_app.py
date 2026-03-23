@@ -9,6 +9,8 @@ from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical
 from textual.widgets import Header, Footer, Static
 
+from src.session_manager import SessionManager
+
 
 class ResumeEditorApp(App):
     """Main TUI application for the resume editor."""
@@ -58,6 +60,8 @@ class ResumeEditorApp(App):
         super().__init__()
         self.session_name = session_name
         self.sub_title = f"Session: {session_name}"
+        self.session_manager = SessionManager()
+        self.current_data = {}
 
     def compose(self) -> ComposeResult:
         """Compose the TUI layout."""
@@ -76,6 +80,17 @@ class ResumeEditorApp(App):
             id="main-container",
         )
         yield Footer()
+
+    def on_mount(self) -> None:
+        """Load session data on mount."""
+        # Try to load existing session data
+        loaded_data = self.session_manager.load(self.session_name)
+
+        if loaded_data is not None:
+            self.current_data = loaded_data
+        else:
+            # Initialize empty structure for new session
+            self.current_data = {}
 
 
 def run_editor(session_name: str = "default") -> None:
