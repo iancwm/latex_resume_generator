@@ -6,6 +6,7 @@ and viewing live YAML preview.
 """
 
 import yaml
+import requests
 
 from textual.app import App, ComposeResult
 from textual.containers import Container, ScrollableContainer, Vertical
@@ -17,6 +18,11 @@ from src.tui_widgets import YAMLPreview, WorkEntryForm, WorkEntryChanged
 
 class ResumeEditorApp(App):
     """Main TUI application for the resume editor."""
+
+    BINDINGS = [
+        ("ctrl+s", "save", "Save"),
+        ("ctrl+q", "quit", "Quit"),
+    ]
 
     CSS = """
     Screen {
@@ -178,6 +184,45 @@ class ResumeEditorApp(App):
         except Exception:
             # Widget may not be ready yet, silently ignore
             pass
+
+    def save_session(self) -> None:
+        """Save current session data using SessionManager."""
+        self.session_manager.save(self.session_name, self.current_data)
+
+    def compile_resume(self) -> None:
+        """
+        Compile resume by POSTing to preview server.
+
+        Splits current_data into private (basics) and public (everything else)
+        and sends to preview server /compile endpoint.
+        Updates sub_title with compile status.
+        """
+        try:
+            # Split into private/public
+            private = {"basics": self.current_data.get("basics", {})}
+            public = {k: v for k, v in self.current_data.items() if k != "basics"}
+
+            resp = requests.post(
+                "http://localhost:8000/compile",
+                json={"private": private, "public": public},
+                timeout=5
+            )
+
+            if resp.status_code == 200:
+                self.sub_title = f"Session: {self.session_name} | Compiled ✓"
+            else:
+                self.sub_title = f"Session: {self.session_name} | Compile failed"
+        except Exception:
+            self.sub_title = f"Session: {self.session_name} | Server unavailable"
+
+    def _trigger_compile(self) -> None:
+        """Trigger compile by calling compile_resume."""
+        self.compile_resume()
+
+    def action_save(self) -> None:
+        """Save session and trigger compile."""
+        self.save_session()
+        self._trigger_compile()
 
 
 def run_editor(session_name: str = "default") -> None:
