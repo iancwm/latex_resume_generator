@@ -23,6 +23,8 @@ from src.tui_widgets import (
     BasicsChanged,
     SkillCategoryForm,
     SkillsChanged,
+    ProjectEntryForm,
+    ProjectsChanged,
 )
 
 
@@ -95,6 +97,8 @@ class ResumeEditorApp(App):
                 ScrollableContainer(id="work-forms-container"),
                 Static("Skills", classes="pane-title"),
                 ScrollableContainer(id="skills-forms-container"),
+                Static("Projects", classes="pane-title"),
+                ScrollableContainer(id="projects-forms-container"),
                 id="left-pane",
             ),
             Vertical(
@@ -128,6 +132,9 @@ class ResumeEditorApp(App):
 
         # Create skill category forms
         self._create_skill_category_forms()
+
+        # Create project entry forms
+        self._create_project_entry_forms()
 
         # Update YAML preview with current data
         self.update_yaml_preview()
@@ -198,6 +205,30 @@ class ResumeEditorApp(App):
             # Create a form for each skill category
             for i, entry in enumerate(skills_entries):
                 form = SkillCategoryForm(entry=entry, entry_index=i, id=f"skill-form-{i}")
+                container.mount(form)
+
+        except Exception:
+            # Container may not be ready yet
+            pass
+
+    def _create_project_entry_forms(self) -> None:
+        """Create ProjectEntryForm widgets for each project entry in current_data."""
+        try:
+            container = self.query_one("#projects-forms-container", ScrollableContainer)
+            # Clear existing forms
+            container.remove_children()
+
+            # Get project entries from current_data
+            projects_entries = self.current_data.get("projects", [])
+
+            # If no project entries exist, create an empty one
+            if not projects_entries:
+                projects_entries = [{}]
+                self.current_data["projects"] = projects_entries
+
+            # Create a form for each project entry
+            for i, entry in enumerate(projects_entries):
+                form = ProjectEntryForm(entry=entry, entry_index=i, id=f"project-form-{i}")
                 container.mount(form)
 
         except Exception:
@@ -368,6 +399,52 @@ class ResumeEditorApp(App):
                 keywords_list = [kw.strip() for kw in message.value.split(",") if kw.strip()]
                 if keywords_list:
                     entry[yaml_key] = keywords_list
+                elif yaml_key in entry:
+                    del entry[yaml_key]
+            else:
+                entry[yaml_key] = message.value
+        elif yaml_key in entry:
+            del entry[yaml_key]
+
+        # Update YAML preview
+        self.update_yaml_preview()
+
+    def on_projects_changed(self, message: ProjectsChanged) -> None:
+        """
+        Handle project entry field changes.
+
+        Args:
+            message: ProjectsChanged message containing field update info
+        """
+        # Ensure projects list exists
+        if "projects" not in self.current_data:
+            self.current_data["projects"] = []
+
+        # Ensure the entry exists in the list
+        projects_list = self.current_data["projects"]
+        while len(projects_list) <= message.entry_index:
+            projects_list.append({})
+
+        # Update the field in current_data
+        entry = projects_list[message.entry_index]
+
+        # Map field names to YAML keys
+        field_to_key = {
+            "name": "name",
+            "description": "description",
+            "url": "url",
+            "highlights": "highlights",
+        }
+
+        yaml_key = field_to_key.get(message.field_name, message.field_name)
+
+        # Update or remove the field based on value
+        if message.value.strip():
+            # Special handling for highlights: convert comma-separated string to list
+            if yaml_key == "highlights":
+                highlights_list = [h.strip() for h in message.value.split(",") if h.strip()]
+                if highlights_list:
+                    entry[yaml_key] = highlights_list
                 elif yaml_key in entry:
                     del entry[yaml_key]
             else:

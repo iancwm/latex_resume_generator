@@ -256,6 +256,40 @@ class SkillsChanged(Message):
         self.is_valid = is_valid
 
 
+class ProjectsChanged(Message):
+    """
+    Message posted when a project entry form field is changed.
+
+    Attributes:
+        entry_index: The index of the project entry being edited
+        field_name: The name of the field that changed
+        value: The new value of the field
+        is_valid: Whether the new value passes validation
+    """
+
+    def __init__(
+        self,
+        entry_index: int,
+        field_name: str,
+        value: str,
+        is_valid: bool = True,
+    ):
+        """
+        Initialize a ProjectsChanged message.
+
+        Args:
+            entry_index: The index of the project entry being edited
+            field_name: The name of the field that changed
+            value: The new value of the field
+            is_valid: Whether the value passes validation
+        """
+        super().__init__()
+        self.entry_index = entry_index
+        self.field_name = field_name
+        self.value = value
+        self.is_valid = is_valid
+
+
 class WorkEntryForm(Container):
     """
     Form for editing a single work experience entry.
@@ -793,6 +827,185 @@ class SkillCategoryForm(Container):
         # Post message to notify parent of the change
         self.post_message(
             SkillsChanged(
+                entry_index=self.entry_index,
+                field_name=field_name,
+                value=value,
+                is_valid=is_valid,
+            )
+        )
+
+
+class ProjectEntryForm(Container):
+    """
+    Form for editing a single project entry.
+
+    Provides labeled input fields for project name, description, URL,
+    and highlights (comma-separated). Posts ProjectsChanged messages
+    when fields are modified.
+    """
+
+    DEFAULT_CSS = """
+    ProjectEntryForm {
+        layout: vertical;
+        padding: 1;
+        margin-bottom: 1;
+        background: $surface;
+        border: solid $primary;
+    }
+
+    ProjectEntryForm .form-row {
+        layout: horizontal;
+        margin-bottom: 1;
+    }
+
+    ProjectEntryForm .form-row FormField {
+        width: 1fr;
+        margin-right: 1;
+        margin-bottom: 0;
+    }
+
+    ProjectEntryForm .form-row FormField:last-child {
+        margin-right: 0;
+    }
+
+    ProjectEntryForm .error-message {
+        color: $error;
+        text-style: italic;
+        margin-bottom: 1;
+    }
+    """
+
+    def __init__(
+        self,
+        entry: dict = None,
+        entry_index: int = 0,
+        **kwargs,
+    ):
+        """
+        Initialize a ProjectEntryForm widget.
+
+        Args:
+            entry: Dictionary containing project entry data
+            entry_index: Index of this entry in the projects list
+            **kwargs: Additional keyword arguments for Container
+        """
+        super().__init__(**kwargs)
+        self.entry = entry or {}
+        self.entry_index = entry_index
+        self._validation_errors = {}
+
+    def compose(self) -> ComposeResult:
+        """Compose the project entry form layout."""
+        # First row: Project Name (required)
+        yield FormField(
+            field_name="name",
+            label="Project Name",
+            value=self.entry.get("name", ""),
+            placeholder="e.g., My Awesome Project",
+            id=f"project-{self.entry_index}-name",
+        )
+
+        # Second row: Description (optional)
+        yield FormField(
+            field_name="description",
+            label="Description",
+            value=self.entry.get("description", ""),
+            placeholder="e.g., A web application for...",
+            id=f"project-{self.entry_index}-description",
+        )
+
+        # Third row: URL (optional)
+        yield FormField(
+            field_name="url",
+            label="URL",
+            value=self.entry.get("url", ""),
+            placeholder="e.g., https://github.com/user/project",
+            id=f"project-{self.entry_index}-url",
+        )
+
+        # Fourth row: Highlights (comma-separated)
+        # Convert list to comma-separated string for display
+        highlights_list = self.entry.get("highlights", [])
+        highlights_str = ", ".join(highlights_list) if highlights_list else ""
+        yield FormField(
+            field_name="highlights",
+            label="Highlights",
+            value=highlights_str,
+            placeholder="e.g., Built with Python, Used by 1000+ users",
+            id=f"project-{self.entry_index}-highlights",
+        )
+
+        # Error message display (hidden by default)
+        yield Static("", id=f"project-{self.entry_index}-errors", classes="error-message")
+
+    def on_mount(self) -> None:
+        """Handle widget mount."""
+        self._update_error_display()
+
+    def _validate_field(self, field_name: str, value: str) -> bool:
+        """
+        Validate a field value.
+
+        Args:
+            field_name: Name of the field to validate
+            value: Value to validate
+
+        Returns:
+            True if valid, False otherwise
+        """
+        from src.validators import validate_required
+
+        # Project name is required
+        if field_name == "name":
+            return validate_required(value, field_name)
+
+        # Description, URL, and highlights are optional
+        return True
+
+    def _update_error_display(self) -> None:
+        """Update the error message display."""
+        try:
+            error_widget = self.query_one(f"#project-{self.entry_index}-errors", Static)
+            if self._validation_errors:
+                errors = list(self._validation_errors.values())
+                error_widget.update(" • ".join(errors))
+                error_widget.display = True
+            else:
+                error_widget.display = False
+        except Exception:
+            # Widget may not be ready yet
+            pass
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        """
+        Handle input field changes.
+
+        Args:
+            event: Input changed event
+        """
+        # Extract field name from input ID
+        input_id = event.input.id
+        if not input_id or not input_id.startswith(f"project-{self.entry_index}-"):
+            return
+
+        field_name = input_id.replace(f"project-{self.entry_index}-", "")
+        value = event.value
+
+        # Validate the field
+        is_valid = self._validate_field(field_name, value)
+
+        # Update validation errors
+        if is_valid and field_name in self._validation_errors:
+            del self._validation_errors[field_name]
+        elif not is_valid:
+            if field_name == "name":
+                self._validation_errors[field_name] = "Project name is required"
+
+        self._update_error_display()
+
+        # Post message to notify parent of the change
+        self.post_message(
+            ProjectsChanged(
                 entry_index=self.entry_index,
                 field_name=field_name,
                 value=value,
