@@ -128,6 +128,32 @@ class YAMLPreview(TextArea):
         self.text = yaml_content
 
 
+class BasicsChanged(Message):
+    """
+    Message posted when a basics form field is changed.
+
+    Attributes:
+        field_name: The name of the field that changed
+        value: The new value of the field
+    """
+
+    def __init__(
+        self,
+        field_name: str,
+        value: str,
+    ):
+        """
+        Initialize a BasicsChanged message.
+
+        Args:
+            field_name: The name of the field that changed
+            value: The new value of the field
+        """
+        super().__init__()
+        self.field_name = field_name
+        self.value = value
+
+
 class WorkEntryChanged(Message):
     """
     Message posted when a work entry form field is changed.
@@ -346,6 +372,123 @@ class WorkEntryForm(Container):
                 field_name=field_name,
                 value=value,
                 is_valid=is_valid,
+            )
+        )
+
+
+class BasicsForm(Container):
+    """
+    Form for editing basic personal information.
+
+    Provides labeled input fields for name, email, phone, and location.
+    Posts BasicsChanged messages when fields are modified.
+    """
+
+    DEFAULT_CSS = """
+    BasicsForm {
+        layout: vertical;
+        padding: 1;
+        margin-bottom: 1;
+        background: $surface;
+        border: solid $secondary;
+    }
+
+    BasicsForm .form-row {
+        layout: horizontal;
+        margin-bottom: 1;
+    }
+
+    BasicsForm .form-row FormField {
+        width: 1fr;
+        margin-right: 1;
+        margin-bottom: 0;
+    }
+
+    BasicsForm .form-row FormField:last-child {
+        margin-right: 0;
+    }
+    """
+
+    def __init__(
+        self,
+        basics: dict = None,
+        **kwargs,
+    ):
+        """
+        Initialize a BasicsForm widget.
+
+        Args:
+            basics: Dictionary containing basic personal info
+            **kwargs: Additional keyword arguments for Container
+        """
+        super().__init__(**kwargs)
+        self.basics = basics or {}
+
+    def compose(self) -> ComposeResult:
+        """Compose the basics form layout."""
+        # First row: Name and Email
+        with Horizontal(classes="form-row"):
+            yield FormField(
+                field_name="name",
+                label="Name",
+                value=self.basics.get("name", ""),
+                placeholder="e.g., John Doe",
+                id="basics-name",
+            )
+            yield FormField(
+                field_name="email",
+                label="Email",
+                value=self.basics.get("email", ""),
+                placeholder="e.g., john@example.com",
+                id="basics-email",
+            )
+
+        # Second row: Phone and Location (City, Region)
+        with Horizontal(classes="form-row"):
+            yield FormField(
+                field_name="phone",
+                label="Phone",
+                value=self.basics.get("phone", ""),
+                placeholder="e.g., +1 234 567 8900",
+                id="basics-phone",
+            )
+            # Location is nested: basics["location"]["city"]
+            location = self.basics.get("location", {})
+            yield FormField(
+                field_name="city",
+                label="City",
+                value=location.get("city", ""),
+                placeholder="e.g., San Francisco",
+                id="basics-city",
+            )
+            yield FormField(
+                field_name="region",
+                label="Region",
+                value=location.get("region", ""),
+                placeholder="e.g., CA",
+                id="basics-region",
+            )
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        """
+        Handle input field changes.
+
+        Args:
+            event: Input changed event
+        """
+        # Extract field name from input ID
+        input_id = event.input.id
+        if not input_id or not input_id.startswith("basics-"):
+            return
+
+        field_name = input_id.replace("basics-", "")
+        value = event.value
+
+        # Post message to notify parent of the change
+        self.post_message(
+            BasicsChanged(
+                field_name=field_name,
+                value=value,
             )
         )
 

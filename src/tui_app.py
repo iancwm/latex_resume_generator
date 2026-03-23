@@ -13,7 +13,7 @@ from textual.containers import Container, ScrollableContainer, Vertical
 from textual.widgets import Header, Footer, Static
 
 from src.session_manager import SessionManager
-from src.tui_widgets import YAMLPreview, WorkEntryForm, WorkEntryChanged
+from src.tui_widgets import YAMLPreview, WorkEntryForm, WorkEntryChanged, BasicsForm, BasicsChanged
 
 
 class ResumeEditorApp(App):
@@ -77,6 +77,8 @@ class ResumeEditorApp(App):
         yield Header()
         yield Container(
             Vertical(
+                Static("Personal Info (Basics)", classes="pane-title"),
+                BasicsForm(id="basics-form"),
                 Static("Work Experience", classes="pane-title"),
                 ScrollableContainer(id="work-forms-container"),
                 id="left-pane",
@@ -100,6 +102,9 @@ class ResumeEditorApp(App):
         else:
             # Initialize empty structure for new session
             self.current_data = {}
+
+        # Initialize basics form with current data
+        self._update_basics_form()
 
         # Create work entry forms
         self._create_work_entry_forms()
@@ -130,6 +135,57 @@ class ResumeEditorApp(App):
         except Exception:
             # Container may not be ready yet
             pass
+
+    def _update_basics_form(self) -> None:
+        """Update BasicsForm with current_data['basics']."""
+        try:
+            basics_form = self.query_one("#basics-form", BasicsForm)
+            basics_data = self.current_data.get("basics", {})
+            basics_form.basics = basics_data
+            
+            # Update all fields in the form
+            location = basics_data.get("location", {})
+            
+            basics_form.query_one("#basics-name Input").value = basics_data.get("name", "")
+            basics_form.query_one("#basics-email Input").value = basics_data.get("email", "")
+            basics_form.query_one("#basics-phone Input").value = basics_data.get("phone", "")
+            basics_form.query_one("#basics-city Input").value = location.get("city", "")
+            basics_form.query_one("#basics-region Input").value = location.get("region", "")
+            
+        except Exception:
+            # Widget may not be ready yet
+            pass
+
+    def on_basics_changed(self, message: BasicsChanged) -> None:
+        """
+        Handle basics form field changes.
+
+        Args:
+            message: BasicsChanged message containing field update info
+        """
+        # Ensure basics dict exists
+        if "basics" not in self.current_data:
+            self.current_data["basics"] = {}
+
+        basics = self.current_data["basics"]
+
+        # Handle location fields specially (nested dict)
+        if message.field_name in ("city", "region"):
+            if "location" not in basics:
+                basics["location"] = {}
+            if message.value.strip():
+                basics["location"][message.field_name] = message.value
+            elif message.field_name in basics.get("location", {}):
+                del basics["location"][message.field_name]
+        else:
+            # Handle top-level basics fields
+            if message.value.strip():
+                basics[message.field_name] = message.value
+            elif message.field_name in basics:
+                del basics[message.field_name]
+
+        # Update YAML preview
+        self.update_yaml_preview()
 
     def on_work_entry_changed(self, message: WorkEntryChanged) -> None:
         """
