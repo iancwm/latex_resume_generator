@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse, StreamingResponse, FileResponse
 import uvicorn
 
 from src.session_manager import atomic_write
@@ -128,6 +128,274 @@ def create_app(sessions_dir: str, inputs_dir: str, dist_dir: str) -> FastAPI:
                 "Connection": "keep-alive",
             }
         )
+
+    @app.get("/preview.pdf")
+    async def preview_pdf():
+        """Serve compiled PDF using FileResponse."""
+        pdf_path = Path(dist_dir) / "resume.pdf"
+        if not pdf_path.exists():
+            return JSONResponse(
+                status_code=404,
+                content={"error": "PDF not found. Compile first."}
+            )
+        return FileResponse(
+            path=str(pdf_path),
+            media_type="application/pdf",
+            filename="resume.pdf"
+        )
+
+    @app.get("/preview")
+    async def preview():
+        """HTML page with PDF viewer iframe + SSE listener + error polling."""
+        html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #16213e;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0f3460;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: #e94560;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .status.ready {
+            background: #00c853;
+            color: #000;
+        }
+        .status.error {
+            background: #ff5252;
+            color: #fff;
+        }
+        .status.compiling {
+            background: #ffca28;
+            color: #000;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+        .pdf-container {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 600px;
+        }
+        .pdf-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .error-panel {
+            background: #2d1f1f;
+            border: 1px solid #ff5252;
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+        }
+        .error-panel.visible {
+            display: block;
+        }
+        .error-panel h3 {
+            color: #ff5252;
+            margin-bottom: 0.5rem;
+        }
+        .error-panel pre {
+            background: #1a1a1a;
+            padding: 0.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-panel {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+        .log-entry {
+            margin-bottom: 0.25rem;
+        }
+        .log-entry.info {
+            color: #58a6ff;
+        }
+        .log-entry.success {
+            color: #3fb950;
+        }
+        .log-entry.error {
+            color: #f85149;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📄 Resume Preview</h1>
+        <div id="status" class="status ready">
+            <div class="status-indicator"></div>
+            <span id="status-text">Ready</span>
+        </div>
+    </div>
+    <div class="main-content">
+        <div id="error-panel" class="error-panel">
+            <h3>⚠️ Compilation Error</h3>
+            <pre id="error-message"></pre>
+        </div>
+        <div class="pdf-container">
+            <iframe id="pdf-frame" src="/preview.pdf" title="Resume PDF Preview"></iframe>
+        </div>
+        <div class="log-panel" id="log-panel">
+            <div class="log-entry info">[INFO] Preview server connected</div>
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const statusTextEl = document.getElementById('status-text');
+        const errorPanel = document.getElementById('error-panel');
+        const errorMessage = document.getElementById('error-message');
+        const logPanel = document.getElementById('log-panel');
+        const pdfFrame = document.getElementById('pdf-frame');
+
+        let lastError = null;
+        let compileStatus = 'ready';
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function setStatus(status, text) {
+            compileStatus = status;
+            statusEl.className = `status ${status}`;
+            statusTextEl.textContent = text;
+        }
+
+        function showError(error) {
+            if (error !== lastError) {
+                lastError = error;
+                errorMessage.textContent = error;
+                errorPanel.classList.add('visible');
+                log(`Error: ${error}`, 'error');
+            }
+        }
+
+        function hideError() {
+            if (lastError) {
+                lastError = null;
+                errorPanel.classList.remove('visible');
+                log('Error cleared', 'success');
+            }
+        }
+
+        // SSE Connection for compile events
+        function connectSSE() {
+            const eventSource = new EventSource('/events');
+
+            eventSource.onopen = () => {
+                log('SSE connection established', 'success');
+            };
+
+            eventSource.onmessage = (event) => {
+                if (event.data === 'compile_complete') {
+                    setStatus('ready', 'Compiled Successfully');
+                    hideError();
+                    pdfFrame.src = '/preview.pdf?' + Date.now();
+                    log('Compile complete - refreshing preview', 'success');
+                } else if (event.data === 'compile_start') {
+                    setStatus('compiling', 'Compiling...');
+                    log('Compile started', 'info');
+                } else if (event.data === 'compile_error') {
+                    setStatus('error', 'Compilation Failed');
+                    checkError();
+                }
+            };
+
+            eventSource.onerror = () => {
+                log('SSE connection lost, reconnecting...', 'error');
+                eventSource.close();
+                setTimeout(connectSSE, 2000);
+            };
+        }
+
+        // Error polling every 2 seconds
+        async function checkError() {
+            try {
+                const response = await fetch('/error');
+                const data = await response.json();
+                if (data.last_error) {
+                    showError(data.last_error);
+                } else {
+                    hideError();
+                }
+            } catch (err) {
+                log(`Error polling failed: ${err.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        log('Initializing preview...', 'info');
+        connectSSE();
+        setInterval(checkError, 2000);
+        checkError();
+    </script>
+</body>
+</html>
+"""
+        return HTMLResponse(content=html_content)
 
     return app
 
