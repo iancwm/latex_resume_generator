@@ -184,14 +184,14 @@ class ResumeEditorApp(App):
         """Focus the first input field in the basics form."""
         try:
             # Try to focus the first input in the basics form
-            basics_form = self.query_one("#basics-form-container", ScrollableContainer)
+            basics_form = self.query_one("#basics-form", BasicsForm)
             first_input = basics_form.query_one("Input")
             if first_input:
                 self.notify(f"Focusing input: {first_input.id}")
                 first_input.focus()
                 self.notify("Input focused! You can now type.")
             else:
-                self.notify("No input found!")
+                self.notify("No input found in basics form!")
         except Exception as e:
             self.notify(f"Focus error: {e}")
 
