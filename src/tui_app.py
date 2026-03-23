@@ -68,7 +68,6 @@ class ResumeEditorApp(App):
         background: $surface;
         border: solid $primary;
         padding: 1;
-        overflow: auto;
     }
 
     #right-pane {
@@ -142,14 +141,18 @@ class ResumeEditorApp(App):
 
     def on_mount(self) -> None:
         """Load session data on mount and create work entry forms."""
+        self.notify(f"Mounting session: {self.session_name}")
+        
         # Try to load existing session data
         loaded_data = self.session_manager.load(self.session_name)
 
         if loaded_data is not None:
             self.current_data = loaded_data
+            self.notify("Loaded existing session")
         else:
             # Initialize empty structure for new session
             self.current_data = {}
+            self.notify("New session created")
 
         # Set initial state for undo manager
         self.undo_manager.set_initial_state(copy.deepcopy(self.current_data))
@@ -171,6 +174,8 @@ class ResumeEditorApp(App):
 
         # Update YAML preview with current data
         self.update_yaml_preview()
+        
+        self.notify("Forms created, focusing first input...")
 
         # Focus the first input field so user can start typing immediately
         self.call_after_refresh(self._focus_first_input)
@@ -182,15 +187,13 @@ class ResumeEditorApp(App):
             basics_form = self.query_one("#basics-form-container", ScrollableContainer)
             first_input = basics_form.query_one("Input")
             if first_input:
+                self.notify(f"Focusing input: {first_input.id}")
                 first_input.focus()
-        except Exception:
-            # If basics form doesn't exist yet, try any input
-            try:
-                first_input = self.query_one("Input")
-                if first_input:
-                    first_input.focus()
-            except Exception:
-                pass  # No inputs available yet
+                self.notify("Input focused! You can now type.")
+            else:
+                self.notify("No input found!")
+        except Exception as e:
+            self.notify(f"Focus error: {e}")
 
     def _create_work_entry_forms(self) -> None:
         """Create WorkEntryForm widgets for each work entry in current_data."""
