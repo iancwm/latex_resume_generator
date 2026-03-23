@@ -44,11 +44,8 @@ class ResumeEditorApp(App):
         ("ctrl+3", "jump_education", "Education"),
         ("ctrl+4", "jump_skills", "Skills"),
         ("ctrl+5", "jump_projects", "Projects"),
-    ]
-
-    # Bindings that only work when no input widget is focused
-    BINDINGS_FOCUS = [
-        ("escape", "focus_next", "Next field"),
+        ("tab", "focus_next", "Next field"),
+        ("shift+tab", "focus_previous", "Prev field"),
     ]
 
     CSS = """
@@ -572,6 +569,14 @@ class ResumeEditorApp(App):
     def _trigger_compile(self) -> None:
         """Trigger compile by calling compile_resume."""
         self.compile_resume()
+
+    def action_focus_next(self) -> None:
+        """Focus the next input field."""
+        self.focus_next()
+
+    def action_focus_previous(self) -> None:
+        """Focus the previous input field."""
+        self.focus_previous()
 
     def action_save(self) -> None:
         """Save session and trigger compile."""
