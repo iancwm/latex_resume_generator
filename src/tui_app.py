@@ -98,11 +98,6 @@ class ResumeEditorApp(App):
     ScrollableContainer {
         scrollbar-gutter: stable;
     }
-    
-    /* Ensure containers can pass focus to children */
-    Container, #left-pane, #right-pane {
-        can-focus: false;
-    }
     """
 
     def __init__(self, session_name: str = "default"):
