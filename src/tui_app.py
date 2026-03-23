@@ -5,11 +5,14 @@ Provides a Textual-based TUI with split panes for editing resume data
 and viewing live YAML preview.
 """
 
+import yaml
+
 from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical
 from textual.widgets import Header, Footer, Static
 
 from src.session_manager import SessionManager
+from src.tui_widgets import YAMLPreview
 
 
 class ResumeEditorApp(App):
@@ -74,7 +77,7 @@ class ResumeEditorApp(App):
             ),
             Vertical(
                 Static("YAML Preview", classes="pane-title"),
-                Static("[YAML Preview - Coming Soon]", id="yaml-preview-content"),
+                YAMLPreview(id="yaml-preview"),
                 id="right-pane",
             ),
             id="main-container",
@@ -91,6 +94,24 @@ class ResumeEditorApp(App):
         else:
             # Initialize empty structure for new session
             self.current_data = {}
+
+        # Update YAML preview with current data
+        self.update_yaml_preview()
+
+    def update_yaml_preview(self) -> None:
+        """
+        Update the YAML preview panel with current_data.
+
+        Converts current_data dict to YAML string and displays it
+        in the YAMLPreview widget.
+        """
+        try:
+            yaml_preview = self.query_one("#yaml-preview", YAMLPreview)
+            yaml_content = yaml.dump(self.current_data, default_flow_style=False, sort_keys=False)
+            yaml_preview.set_yaml(yaml_content)
+        except Exception:
+            # Widget may not be ready yet, silently ignore
+            pass
 
 
 def run_editor(session_name: str = "default") -> None:
