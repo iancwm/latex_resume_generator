@@ -573,12 +573,12 @@ class ResumeEditorApp(App):
         self.compile_resume()
 
     def action_focus_next(self) -> None:
-        """Focus the next input field."""
-        self.focus_next()
+        """Focus the next focusable widget."""
+        self.screen.focus_next()
 
     def action_focus_previous(self) -> None:
-        """Focus the previous input field."""
-        self.focus_previous()
+        """Focus the previous focusable widget."""
+        self.screen.focus_previous()
 
     def action_save(self) -> None:
         """Save session and trigger compile."""
