@@ -46,6 +46,11 @@ class ResumeEditorApp(App):
         ("ctrl+5", "jump_projects", "Projects"),
     ]
 
+    # Bindings that only work when no input widget is focused
+    BINDINGS_FOCUS = [
+        ("escape", "focus_next", "Next field"),
+    ]
+
     CSS = """
     Screen {
         layout: grid;
@@ -78,6 +83,21 @@ class ResumeEditorApp(App):
         text-style: bold;
         color: $text;
         margin-bottom: 1;
+    }
+
+    /* Make input fields more visible when focused */
+    Input {
+        width: 100%;
+    }
+
+    Input:focus {
+        background: $primary-darken-2;
+        color: $text;
+    }
+
+    /* Ensure scrollable containers don't block focus */
+    ScrollableContainer {
+        scrollbar-gutter: stable;
     }
     """
 
@@ -152,6 +172,26 @@ class ResumeEditorApp(App):
 
         # Update YAML preview with current data
         self.update_yaml_preview()
+
+        # Focus the first input field so user can start typing immediately
+        self.call_after_refresh(self._focus_first_input)
+
+    def _focus_first_input(self) -> None:
+        """Focus the first input field in the basics form."""
+        try:
+            # Try to focus the first input in the basics form
+            basics_form = self.query_one("#basics-form-container", ScrollableContainer)
+            first_input = basics_form.query_one("Input")
+            if first_input:
+                first_input.focus()
+        except Exception:
+            # If basics form doesn't exist yet, try any input
+            try:
+                first_input = self.query_one("Input")
+                if first_input:
+                    first_input.focus()
+            except Exception:
+                pass  # No inputs available yet
 
     def _create_work_entry_forms(self) -> None:
         """Create WorkEntryForm widgets for each work entry in current_data."""
