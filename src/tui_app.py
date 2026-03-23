@@ -13,7 +13,15 @@ from textual.containers import Container, ScrollableContainer, Vertical
 from textual.widgets import Header, Footer, Static
 
 from src.session_manager import SessionManager
-from src.tui_widgets import YAMLPreview, WorkEntryForm, WorkEntryChanged, BasicsForm, BasicsChanged
+from src.tui_widgets import (
+    YAMLPreview,
+    WorkEntryForm,
+    WorkEntryChanged,
+    EducationEntryForm,
+    EducationChanged,
+    BasicsForm,
+    BasicsChanged,
+)
 
 
 class ResumeEditorApp(App):
@@ -79,6 +87,8 @@ class ResumeEditorApp(App):
             Vertical(
                 Static("Personal Info (Basics)", classes="pane-title"),
                 BasicsForm(id="basics-form"),
+                Static("Education", classes="pane-title"),
+                ScrollableContainer(id="education-forms-container"),
                 Static("Work Experience", classes="pane-title"),
                 ScrollableContainer(id="work-forms-container"),
                 id="left-pane",
@@ -106,6 +116,9 @@ class ResumeEditorApp(App):
         # Initialize basics form with current data
         self._update_basics_form()
 
+        # Create education entry forms
+        self._create_education_entry_forms()
+
         # Create work entry forms
         self._create_work_entry_forms()
 
@@ -130,6 +143,30 @@ class ResumeEditorApp(App):
             # Create a form for each work entry
             for i, entry in enumerate(work_entries):
                 form = WorkEntryForm(entry=entry, entry_index=i, id=f"work-form-{i}")
+                container.mount(form)
+
+        except Exception:
+            # Container may not be ready yet
+            pass
+
+    def _create_education_entry_forms(self) -> None:
+        """Create EducationEntryForm widgets for each education entry in current_data."""
+        try:
+            container = self.query_one("#education-forms-container", ScrollableContainer)
+            # Clear existing forms
+            container.remove_children()
+
+            # Get education entries from current_data
+            education_entries = self.current_data.get("education", [])
+
+            # If no education entries exist, create an empty one
+            if not education_entries:
+                education_entries = [{}]
+                self.current_data["education"] = education_entries
+
+            # Create a form for each education entry
+            for i, entry in enumerate(education_entries):
+                form = EducationEntryForm(entry=entry, entry_index=i, id=f"edu-form-{i}")
                 container.mount(form)
 
         except Exception:
@@ -213,6 +250,46 @@ class ResumeEditorApp(App):
             "location": "location",
             "start_date": "startDate",
             "end_date": "endDate",
+        }
+
+        yaml_key = field_to_key.get(message.field_name, message.field_name)
+
+        # Update or remove the field based on value
+        if message.value.strip():
+            entry[yaml_key] = message.value
+        elif yaml_key in entry:
+            del entry[yaml_key]
+
+        # Update YAML preview
+        self.update_yaml_preview()
+
+    def on_education_entry_changed(self, message: EducationChanged) -> None:
+        """
+        Handle education entry field changes.
+
+        Args:
+            message: EducationChanged message containing field update info
+        """
+        # Ensure education list exists
+        if "education" not in self.current_data:
+            self.current_data["education"] = []
+
+        # Ensure the entry exists in the list
+        education_list = self.current_data["education"]
+        while len(education_list) <= message.entry_index:
+            education_list.append({})
+
+        # Update the field in current_data
+        entry = education_list[message.entry_index]
+
+        # Map field names to YAML keys
+        field_to_key = {
+            "institution": "institution",
+            "area": "area",
+            "location": "location",
+            "start_date": "startDate",
+            "end_date": "endDate",
+            "score": "score",
         }
 
         yaml_key = field_to_key.get(message.field_name, message.field_name)
