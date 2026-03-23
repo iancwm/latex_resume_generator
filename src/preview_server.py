@@ -2,11 +2,12 @@ import os
 import uuid
 import time
 import threading
+import asyncio
 import tempfile
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse, StreamingResponse
 import uvicorn
 
 from src.session_manager import atomic_write
@@ -110,6 +111,23 @@ def create_app(sessions_dir: str, inputs_dir: str, dist_dir: str) -> FastAPI:
     async def error():
         """Return the last error message."""
         return {"last_error": last_error}
+
+    @app.get("/events")
+    async def events():
+        """SSE endpoint for browser auto-refresh notifications."""
+        async def event_generator():
+            while True:
+                yield "data: ping\n\n"
+                await asyncio.sleep(30)
+
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            }
+        )
 
     return app
 

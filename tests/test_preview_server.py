@@ -71,3 +71,13 @@ def test_error_endpoint(test_server):
     assert resp.status_code == 200
     data = resp.json()
     assert "last_error" in data
+
+
+def test_sse_endpoint(test_server):
+    """Test GET /events endpoint returns text/event-stream content-type."""
+    server, port = test_server
+    resp = requests.get(f"http://localhost:{port}/events", stream=True, timeout=2)
+    assert resp.status_code == 200
+    assert "text/event-stream" in resp.headers.get("content-type", "")
+    assert resp.headers.get("cache-control") == "no-cache"
+    assert resp.headers.get("connection") == "keep-alive"
