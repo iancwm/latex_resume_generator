@@ -63,11 +63,13 @@ class FormField(Widget):
     def compose(self) -> ComposeResult:
         """Compose the form field layout."""
         yield Label(self.label_text, id=f"label-{self.field_name}")
-        yield Input(
+        input_widget = Input(
             value=self._initial_value,
             placeholder=self._placeholder,
             id=f"input-{self.field_name}",
         )
+        input_widget.can_focus = True
+        yield input_widget
 
     def get_value(self) -> str:
         """

@@ -68,6 +68,7 @@ class ResumeEditorApp(App):
         background: $surface;
         border: solid $primary;
         padding: 1;
+        overflow: auto;
     }
 
     #right-pane {
@@ -90,11 +91,17 @@ class ResumeEditorApp(App):
     Input:focus {
         background: $primary-darken-2;
         color: $text;
+        text-style: reverse;
     }
 
     /* Ensure scrollable containers don't block focus */
     ScrollableContainer {
         scrollbar-gutter: stable;
+    }
+    
+    /* Ensure containers can pass focus to children */
+    Container, #left-pane, #right-pane {
+        can-focus: false;
     }
     """
 
