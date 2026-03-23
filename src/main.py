@@ -2,10 +2,14 @@ import os
 import re
 import yaml
 import typer
+from pathlib import Path
 from simple_term_menu import TerminalMenu
 
 from src.engine import generate as engine_generate
 from src.config import load_config
+from src.session_manager import SessionManager
+from src.preview_server import PreviewServer
+from src.tui_app import run_editor
 
 app = typer.Typer()
 
@@ -115,6 +119,116 @@ def list_templates():
     )
     for name, data in registry["cover_letter"].items():
         typer.echo(f"  - {name}: {data['description']}")
+
+
+@app.command()
+def edit(
+    session: str = typer.Option(
+        "default",
+        "--session", "-s",
+        help="Session name to load/save."
+    ),
+    resume: bool = typer.Option(
+        False,
+        "--resume", "-r",
+        help="Edit resume (default)."
+    ),
+    cover_letter: bool = typer.Option(
+        False,
+        "--cover-letter", "-c",
+        help="Edit cover letter."
+    )
+):
+    """
+    Launch TUI editor with session support.
+    
+    Edit resume or cover letter data interactively with live preview.
+    Sessions are saved to .sessions/ directory.
+    """
+    doc_type = "cover_letter" if cover_letter else "resume"
+    session_name = f"{session}_{doc_type}" if session != "default" else doc_type
+    
+    typer.echo(f"Launching TUI editor for {doc_type} (session: {session_name})")
+    run_editor(session_name=session_name)
+
+
+@app.command()
+def sessions(
+    delete: str = typer.Option(
+        None,
+        "--delete", "-d",
+        help="Delete specified session by name."
+    ),
+    list_all: bool = typer.Option(
+        False,
+        "--list", "-l",
+        help="List all sessions (default behavior if no options provided)."
+    )
+):
+    """
+    List or delete sessions.
+    
+    Manage editing sessions stored in .sessions/ directory.
+    """
+    manager = SessionManager()
+    
+    if delete:
+        if manager.exists(delete):
+            manager.delete(delete)
+            typer.echo(f"Session '{delete}' deleted successfully.")
+        else:
+            typer.echo(f"Error: Session '{delete}' not found.")
+            raise typer.Exit(code=1)
+    else:
+        # List sessions (default behavior)
+        available_sessions = manager.list_sessions()
+        if not available_sessions:
+            typer.echo("No sessions found.")
+        else:
+            typer.echo(f"Available sessions ({len(available_sessions)}):")
+            for session_name in available_sessions:
+                typer.echo(f"  - {session_name}")
+
+
+@app.command()
+def preview(
+    stop: bool = typer.Option(
+        False,
+        "--stop",
+        help="Stop the running preview server."
+    ),
+    port: int = typer.Option(
+        8000,
+        "--port", "-p",
+        help="Port to run preview server on."
+    )
+):
+    """
+    Start or stop the preview server.
+    
+    Launches a local web server for live preview of resume changes.
+    Access at http://127.0.0.1:<port>/preview
+    """
+    if stop:
+        # Try to stop running server
+        pid_file = Path(".sessions/preview_server.pid")
+        if pid_file.exists():
+            import signal
+            pid = int(pid_file.read_text())
+            try:
+                os.kill(pid, signal.SIGTERM)
+                pid_file.unlink()
+                typer.echo(f"Preview server (PID {pid}) stopped.")
+            except ProcessLookupError:
+                pid_file.unlink()
+                typer.echo("Preview server was not running (stale PID file removed).")
+        else:
+            typer.echo("No preview server is currently running.")
+    else:
+        typer.echo(f"Starting preview server on http://127.0.0.1:{port}/preview")
+        typer.echo("Press Ctrl+C to stop")
+        server = PreviewServer(port=port)
+        server.run()
 
 
 def deep_merge(target: dict, source: dict):
