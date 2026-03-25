@@ -14,3 +14,7 @@ htmlcov/
 *.tex
 !templates/**/*.tex
 !inputs/*.yaml
+# Session files
+.sessions/
+.sessions_test/
+.qwen/

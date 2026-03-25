@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Editor - {{ session_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if message %}
+    <div class="notification {{ message_type }}">{{ message }}</div>
+    {% endif %}
+    
+    <form id="resume-form" 
+          hx-post="/save" 
+          hx-trigger="submit"
+          hx-target="#save-notification"
+          hx-swap="outerHTML"
+          onsubmit="updateJsonFields()">
+        
+        <!-- Hidden JSON fields for complex data -->
+        <input type="hidden" id="work-entries-json" name="work_entries" value="[]">
+        <input type="hidden" id="education-entries-json" name="education_entries" value="[]">
+        <input type="hidden" id="skills-entries-json" name="skills_entries" value="[]">
+        <input type="hidden" id="projects-entries-json" name="projects_entries" value="[]">
+        
+        <!-- Basics Section -->
+        <div class="section" id="basics-section">
+            <h2 class="section-title">Personal Information</h2>
+            
+            <div class="form-group">
+                <label for="basics-name">Full Name <span class="required">*</span></label>
+                <input type="text" 
+                       id="basics-name" 
+                       name="name" 
+                       value="{{ data.basics.name if data.basics else '' }}"
+                       placeholder="John Doe"
+                       required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="basics-email">Email <span class="required">*</span></label>
+                    <input type="email" 
+                           id="basics-email" 
+                           name="email" 
+                           value="{{ data.basics.email if data.basics else '' }}"
+                           placeholder="john@example.com"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="basics-phone">Phone</label>
+                    <input type="tel" 
+                           id="basics-phone" 
+                           name="phone" 
+                           value="{{ data.basics.phone if data.basics else '' }}"
+                           placeholder="+1 (555) 123-4567">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="basics-city">City</label>
+                    <input type="text" 
+                           id="basics-city" 
+                           name="city" 
+                           value="{{ data.basics.location.city if data.basics.location else '' }}"
+                           placeholder="San Francisco">
+                </div>
+                
+                <div class="form-group">
+                    <label for="basics-region">State/Region</label>
+                    <input type="text" 
+                           id="basics-region" 
+                           name="region" 
+                           value="{{ data.basics.location.region if data.basics.location else '' }}"
+                           placeholder="CA">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Work Experience Section -->
+        <div class="section" id="work-section">
+            <h2 class="section-title">Work Experience</h2>
+            
+            <div id="work-entries-container">
+                {% for entry in data.work %}
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <span class="entry-title">Entry {{ loop.index }}</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Company <span class="required">*</span></label>
+                            <input type="text" 
+                                   data-field="company"
+                                   value="{{ entry.company if entry.company else '' }}"
+                                   placeholder="Company Name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Position <span class="required">*</span></label>
+                            <input type="text" 
+                                   data-field="position"
+                                   value="{{ entry.position if entry.position else '' }}"
+                                   placeholder="Software Engineer">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" 
+                                   data-field="location"
+                                   value="{{ entry.location if entry.location else '' }}"
+                                   placeholder="San Francisco, CA">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="text" 
+                                   data-field="start_date"
+                                   value="{{ entry.startDate if entry.startDate else '' }}"
+                                   placeholder="YYYY-MM">
+                            <div class="help-text">Format: YYYY-MM</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="text" 
+                                   data-field="end_date"
+                                   value="{{ entry.endDate if entry.endDate else '' }}"
+                                   placeholder="YYYY-MM or Present">
+                            <div class="help-text">Use "Present" if current role</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Summary</label>
+                        <textarea data-field="summary" 
+                                  placeholder="• Led development of...&#10;• Improved performance by...">{{ entry.summary | join('\n') if entry.summary else '' }}</textarea>
+                        <div class="inline-note">Enter bullet points, one per line (omit the bullet)</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="addWorkEntry()">+ Add Work Entry</button>
+            </div>
+        </div>
+        
+        <!-- Education Section -->
+        <div class="section" id="education-section">
+            <h2 class="section-title">Education</h2>
+            
+            <div id="education-entries-container">
+                {% for entry in data.education %}
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <span class="entry-title">Entry {{ loop.index }}</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Institution <span class="required">*</span></label>
+                            <input type="text" 
+                                   data-field="institution"
+                                   value="{{ entry.institution if entry.institution else '' }}"
+                                   placeholder="University Name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Area of Study <span class="required">*</span></label>
+                            <input type="text" 
+                                   data-field="area"
+                                   value="{{ entry.area if entry.area else '' }}"
+                                   placeholder="Computer Science">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" 
+                                   data-field="location"
+                                   value="{{ entry.location if entry.location else '' }}"
+                                   placeholder="Boston, MA">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="text" 
+                                   data-field="start_date"
+                                   value="{{ entry.startDate if entry.startDate else '' }}"
+                                   placeholder="YYYY-MM">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="text" 
+                                   data-field="end_date"
+                                   value="{{ entry.endDate if entry.endDate else '' }}"
+                                   placeholder="YYYY-MM">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Score/GPA</label>
+                            <input type="text" 
+                                   data-field="score"
+                                   value="{{ entry.score if entry.score else '' }}"
+                                   placeholder="3.8 GPA">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="addEducationEntry()">+ Add Education Entry</button>
+            </div>
+        </div>
+        
+        <!-- Skills Section -->
+        <div class="section" id="skills-section">
+            <h2 class="section-title">Skills</h2>
+            
+            <div id="skills-entries-container">
+                {% for entry in data.skills %}
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <span class="entry-title">Category {{ loop.index }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category Name <span class="required">*</span></label>
+                        <input type="text" 
+                               data-field="category"
+                               value="{{ entry.category if entry.category else '' }}"
+                               placeholder="Programming Languages">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Keywords</label>
+                        <textarea data-field="keywords" 
+                                  placeholder="Python, Java, JavaScript, TypeScript">{{ entry.keywords | join(', ') if entry.keywords else '' }}</textarea>
+                        <div class="help-text">Comma-separated list</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="addSkillEntry()">+ Add Skill Category</button>
+            </div>
+        </div>
+        
+        <!-- Projects Section -->
+        <div class="section" id="projects-section">
+            <h2 class="section-title">Projects</h2>
+            
+            <div id="projects-entries-container">
+                {% for entry in data.projects %}
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <span class="entry-title">Project {{ loop.index }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Project Name <span class="required">*</span></label>
+                        <input type="text" 
+                               data-field="name"
+                               value="{{ entry.name if entry.name else '' }}"
+                               placeholder="My Awesome Project">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea data-field="description" 
+                                  placeholder="A brief description of the project...">{{ entry.description if entry.description else '' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>URL</label>
+                        <input type="url" 
+                               data-field="url"
+                               value="{{ entry.url if entry.url else '' }}"
+                               placeholder="https://github.com/user/project">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Highlights</label>
+                        <textarea data-field="highlights" 
+                                  placeholder="Built with React and Node.js&#10;Used by 1000+ users">{{ entry.highlights | join('\n') if entry.highlights else '' }}</textarea>
+                        <div class="inline-note">One highlight per line</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="addProjectEntry()">+ Add Project</button>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="actions-bar">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">💾 Save Session</button>
+                <button type="button" 
+                        class="btn btn-success"
+                        hx-post="/export"
+                        hx-trigger="click"
+                        hx-target="#export-notification"
+                        hx-swap="outerHTML">
+                    📤 Export to YAML
+                </button>
+                <a href="/preview?session={{ session_name }}" target="_blank" class="btn btn-secondary">
+                    📄 Preview PDF
+                </a>
+            </div>
+            <div id="save-notification"></div>
+        </div>
+    </form>
+    
+    <div id="export-notification" style="margin-top: 1rem;"></div>
+</div>
+
+<script>
+    // Add new work entry
+    function addWorkEntry() {
+        const container = document.getElementById('work-entries-container');
+        const count = container.querySelectorAll('.entry-card').length + 1;
+        const entry = document.createElement('div');
+        entry.className = 'entry-card';
+        entry.innerHTML = `
+            <div class="entry-header">
+                <span class="entry-title">Entry ${count}</span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company <span class="required">*</span></label>
+                    <input type="text" data-field="company" placeholder="Company Name">
+                </div>
+                <div class="form-group">
+                    <label>Position <span class="required">*</span></label>
+                    <input type="text" data-field="position" placeholder="Software Engineer">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" data-field="location" placeholder="San Francisco, CA">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="text" data-field="start_date" placeholder="YYYY-MM">
+                    <div class="help-text">Format: YYYY-MM</div>
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="text" data-field="end_date" placeholder="YYYY-MM or Present">
+                    <div class="help-text">Use "Present" if current role</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Summary</label>
+                <textarea data-field="summary" placeholder="• Led development of..."></textarea>
+                <div class="inline-note">Enter bullet points, one per line (omit the bullet)</div>
+            </div>
+        `;
+        container.appendChild(entry);
+        updateJsonFields();
+    }
+    
+    // Add new education entry
+    function addEducationEntry() {
+        const container = document.getElementById('education-entries-container');
+        const count = container.querySelectorAll('.entry-card').length + 1;
+        const entry = document.createElement('div');
+        entry.className = 'entry-card';
+        entry.innerHTML = `
+            <div class="entry-header">
+                <span class="entry-title">Entry ${count}</span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Institution <span class="required">*</span></label>
+                    <input type="text" data-field="institution" placeholder="University Name">
+                </div>
+                <div class="form-group">
+                    <label>Area of Study <span class="required">*</span></label>
+                    <input type="text" data-field="area" placeholder="Computer Science">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" data-field="location" placeholder="Boston, MA">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="text" data-field="start_date" placeholder="YYYY-MM">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="text" data-field="end_date" placeholder="YYYY-MM">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Score/GPA</label>
+                    <input type="text" data-field="score" placeholder="3.8 GPA">
+                </div>
+            </div>
+        `;
+        container.appendChild(entry);
+        updateJsonFields();
+    }
+    
+    // Add new skill entry
+    function addSkillEntry() {
+        const container = document.getElementById('skills-entries-container');
+        const count = container.querySelectorAll('.entry-card').length + 1;
+        const entry = document.createElement('div');
+        entry.className = 'entry-card';
+        entry.innerHTML = `
+            <div class="entry-header">
+                <span class="entry-title">Category ${count}</span>
+            </div>
+            <div class="form-group">
+                <label>Category Name <span class="required">*</span></label>
+                <input type="text" data-field="category" placeholder="Programming Languages">
+            </div>
+            <div class="form-group">
+                <label>Keywords</label>
+                <textarea data-field="keywords" placeholder="Python, Java, JavaScript"></textarea>
+                <div class="help-text">Comma-separated list</div>
+            </div>
+        `;
+        container.appendChild(entry);
+        updateJsonFields();
+    }
+    
+    // Add new project entry
+    function addProjectEntry() {
+        const container = document.getElementById('projects-entries-container');
+        const count = container.querySelectorAll('.entry-card').length + 1;
+        const entry = document.createElement('div');
+        entry.className = 'entry-card';
+        entry.innerHTML = `
+            <div class="entry-header">
+                <span class="entry-title">Project ${count}</span>
+            </div>
+            <div class="form-group">
+                <label>Project Name <span class="required">*</span></label>
+                <input type="text" data-field="name" placeholder="My Awesome Project">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea data-field="description" placeholder="A brief description of the project..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>URL</label>
+                <input type="url" data-field="url" placeholder="https://github.com/user/project">
+            </div>
+            <div class="form-group">
+                <label>Highlights</label>
+                <textarea data-field="highlights" placeholder="Built with React and Node.js"></textarea>
+                <div class="inline-note">One highlight per line</div>
+            </div>
+        `;
+        container.appendChild(entry);
+        updateJsonFields();
+    }
+</script>
+
+{% endblock %}
