@@ -10,6 +10,7 @@ from src.config import load_config
 from src.session_manager import SessionManager
 from src.preview_server import PreviewServer
 from src.tui_app import run_editor
+from src.web_app import run_web_server
 
 app = typer.Typer()
 
@@ -229,6 +230,40 @@ def preview(
         typer.echo("Press Ctrl+C to stop")
         server = PreviewServer(port=port)
         server.run()
+
+
+@app.command()
+def web(
+    session: str = typer.Option(
+        "default",
+        "--session", "-s",
+        help="Session name to use for editing."
+    ),
+    port: int = typer.Option(
+        8000,
+        "--port", "-p",
+        help="Port to run web editor on."
+    ),
+    no_open: bool = typer.Option(
+        False,
+        "--no-open",
+        help="Don't automatically open browser."
+    )
+):
+    """
+    Launch web-based resume editor.
+
+    Opens a browser-based form editor for resume data.
+    Works on any OS with a browser (Windows, WSL, Linux, macOS).
+    """
+    session_name = f"{session}_resume" if session != "default" else "resume"
+    open_browser = not no_open
+    
+    typer.echo(f"Launching web editor at http://localhost:{port}")
+    typer.echo(f"Session: {session_name}")
+    typer.echo("Press Ctrl+C to stop")
+    
+    run_web_server(session_name=session_name, port=port, open_browser=open_browser)
 
 
 def deep_merge(target: dict, source: dict):

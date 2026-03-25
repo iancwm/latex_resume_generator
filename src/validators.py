@@ -8,6 +8,26 @@ import re
 from typing import Tuple, Optional
 
 
+def validate_email(value: str) -> bool:
+    """
+    Validate email format.
+
+    Args:
+        value: The email string to validate
+
+    Returns:
+        True if valid email format, False otherwise
+    """
+    if value is None:
+        return False
+    if not isinstance(value, str):
+        return False
+    
+    # Simple email regex pattern
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return bool(re.match(pattern, value.strip()))
+
+
 def validate_required(value: str, field_name: str) -> bool:
     """
     Check if a required field is not empty.
