@@ -310,7 +310,7 @@ async def health_check():
 def run_web_server(session_name: str = "default", port: int = 8000, open_browser: bool = True):
     """
     Run the web editor server.
-    
+
     Args:
         session_name: Session name to use
         port: Port to run on
@@ -318,11 +318,6 @@ def run_web_server(session_name: str = "default", port: int = 8000, open_browser
     """
     global DEFAULT_SESSION
     DEFAULT_SESSION = session_name
-    
-    url = f"http://localhost:{port}"
-    print(f"Starting web editor at {url}")
-    print(f"Session: {session_name}")
-    print("Press Ctrl+C to stop")
     
     if open_browser:
         # Open browser after a short delay to let server start

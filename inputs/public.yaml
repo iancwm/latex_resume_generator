@@ -1,60 +1,107 @@
-# Field Metadata & Privacy Overrides:
-# You can provide a simple string value for any field, or use the override structure:
-# field:
-#   value: "your value"
-#   private: true/false
-# Fields in this file are PUBLIC by default (will be visible in --redacted mode).
-# Setting 'private: true' will force the field to be redacted even in public mode.
-
-work:
-  - company: "Goldman Sachs"
-    position: "Investment Banking Analyst"
-    location: "New York, NY"
-    startDate: "2022-07"
-    endDate: "Present"
-    summary:
-      - "Executed complex financial models including DCF, LBO, and accretion/dilution analysis for over 15 M&A transactions."
-      - "Collaborated on the execution of a $5.2B acquisition in the TMT sector, managing data room and diligence workflows."
-      - "Prepared pitch books and management presentations for Fortune 500 clients, focusing on capital structure optimization."
-      - value: "Advised senior management on a confidential $1.2B divestiture strategy."
-        private: true # This specific bullet point will be redacted
-
-  - company: "Bridgewater Associates"
-    position: "Investment Intern"
-    location: "Westport, CT"
-    startDate: "2021-06"
-    endDate: "2021-08"
-    summary:
-      - "Built quantitative models to analyze the impact of currency fluctuations on emerging market debt portfolios."
-      - "Conducted deep-dive research into global macro trends, specifically focusing on Asian manufacturing indices."
-      - "Automated data collection for internal research reports using Python and SQL, reducing manual workload by 20%."
-
 education:
-  - institution: "Harvard University"
-    area: "B.A. in Economics"
-    location: "Cambridge, MA"
-    startDate: "2018-09"
-    endDate: "2022-05"
-    score: "3.92/4.0" # GPA
-    honors: ["Cum Laude", "Dean's List (all semesters)", "John Harvard Scholar"]
-    courses: ["Advanced Macroeconomics", "Game Theory", "Corporate Finance", "Machine Learning"]
-
-skills:
-  - category: "Financial Analysis"
-    keywords: ["Financial Modeling", "DCF", "LBO", "M&A Execution", "Valuation (Comps, Precedents)"]
-  - category: "Technical & Data"
-    keywords: ["Python (Pandas, NumPy, Scikit-learn)", "R", "SQL", "Bloomberg Terminal", "CapIQ", "VBA"]
-  - category: "Languages"
-    keywords: ["English (Native)", "Mandarin (Fluent)", "French (Conversational)"]
-
+- area: Master of IT in Business (Artificial Intelligence)
+  end_date: 2022-06
+  institution: Singapore Management University
+  location: Singapore
+  score: ''
+  start_date: 2020-08
+- area: Master of Applied Finance
+  end_date: 2016-06
+  institution: Singapore Management University
+  location: Singapore
+  score: '4.00'
+  start_date: 2015-07
+- area: CFA Charterholder
+  end_date: Present
+  institution: CFA Institute
+  location: Charlottesville, VA
+  score: ''
+  start_date: 2020-06
 projects:
-  - name: "Algorithmic Macro Trading Bot"
-    description: "Developed a Python-based trading bot that executes equity trades based on real-time macroeconomic indicators and sentiment analysis."
-    url: "https://github.com/asterling/macro-bot"
-    highlights: ["Integrated Alpaca API for execution", "Used NLP for news sentiment tracking"]
+- description: 'Streamlit app with OAuth that generates questions of varying difficulties
+    and analyses patterns in mistakes to provide customized feedback for students. '
+  highlights: 'Technologies used: Python, AWS DynamoDB, S3, ECS Fargate, Cloudwatch
+    Logs, Streamlit, Anthropic Platform, Pydantic
 
-  - name: "Personalized Portfolio Optimizer"
-    description: "Built a web-based tool using R and Shiny to optimize asset allocation based on Modern Portfolio Theory."
-    url: "https://github.com/asterling/portfolio-opt"
+    Idempotent setup on AWS
 
-interests: ["Competitive Chess", "Marathon Running", "Historical Biographies", "Urban Planning"]
+    Questions replenished by GenAI when students attempt more than a threshold of
+    questions currently in distribution'
+  name: 'LLM powered GMAT practice platform '
+  url: https://github.com/iancwm/gmat_prep
+- description: End to end ML Engineering project predicting taxi availability given
+    weather conditions
+  highlights: "Technologies used: Python, Tensorflow, Google Cloud Platform (BigQuery,\
+    \ Cloud Functions, Cloud Run), Google Dialogflow\nEstablished ETL processes from\
+    \ web API to relational database, and designed algorithm to efficiently assign\
+    \ weather and taxi availability data to location grids. \nDeployed Telegram chatbot\
+    \ with Dialogflow back end to serve predictions."
+  name: ''
+  url: ''
+skills:
+- category: Programming Languages
+  keywords: Python, SQL, Bash
+- category: Tools
+  keywords: AWS, SQL Server, Coder, Claude Code, Gemini CLI, Pandas, PyTorch
+- category: Finance
+  keywords: Valuation, Financial Statement Analysis, Factor Analysis
+work:
+- company: Acadian Asset Management
+  end_date: Present
+  location: Singapore
+  position: AVP, Investment Analytics and Databases
+  start_date: 2021-10
+  summary: '- Deployed several data pipelines through to production on both on-premise
+    databases and AWS data lake.
+
+    - Deployed feature enhancement to data lake microservice, uncovering data problems
+    and rectifying them along the way.
+
+    - Maintain a suite of Python and PowerShell scripts to automate data checking
+    and data entry processes which result in 30% time savings for daily BAU for the
+    team.
+
+    - Develop SQL queries to drill down into data inputs used for quantitative algorithms
+    to ensure correctness in input and logic.
+
+    - Debug Python investment factors covering myriad aspects of the investment process
+    such as value, momentum and machine learning. Raise Git merge requests to fix
+    logic in code base.
+
+    - Technologies used: Python, SQL Server, GitLab, VSCode, Linux, Jira, Confluence,
+    AWS S3, Claude Code
+
+    - Data vendors used: Bloomberg, Refinitiv, Worldscope, CapitalIQ, ICE Data Services
+
+    '
+- company: RHB
+  end_date: 2021-10
+  location: Singapore
+  position: Senior Investment Analyst, Treasury
+  start_date: 2020-10
+  summary: '- Monitored an Investment Grade bond portfolio of ~USD 2bn for adverse
+    credit rating actions.
+
+    - Drafted credit memorandums covering fundamental analysis and debt repayment
+    capacity to secure credit limits for portfolio.
+
+    - Developed Bloomberg Screening Criteria and Excel spreadsheets for routine reports
+    increasing efficiency by 50%.
+
+    '
+- company: REDD INTELLIGENCE
+  end_date: 2020-06
+  location: Singapore
+  position: Senior Credit Research Analyst
+  start_date: 2017-03
+  summary: '- Analyzed highly leveraged Asia ex-Japan corporates spanning 9 industries
+    and 5 countries, focusing on credit metrics, financial covenants, and restructuring
+    catalysts which were read by portfolio managers and financial advisors.
+
+    - Initiated service trials with CapitalIQ, Reuters Eikon and FactSet to increase
+    research team efficiency.
+
+    - Guided and mentored research interns in drafting research reports and checking
+    financial data integrity.
+
+    '

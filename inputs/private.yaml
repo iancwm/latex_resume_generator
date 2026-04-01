@@ -1,38 +1,7 @@
-# Field Metadata & Privacy Overrides:
-# You can provide a simple string value for any field, or use the override structure:
-# field:
-#   value: "your value"
-#   private: true/false
-# Fields in this file are PRIVATE by default (will be redacted in --redacted mode).
-# Setting 'private: false' will force the field to be visible even in redacted mode.
-
 basics:
-  name: "Alexander Sterling" # Your full legal name
-  label: "Investment Banking Analyst" # Professional title
-  email: "alexander.sterling@alumni.harvard.edu" # Primary contact email
-  phone: "+1 (617) 555-0199" # Phone number with country code
-  url: "https://linkedin.com/in/alexander_sterling" # LinkedIn or Portfolio URL
-  
-  # Summary is often private as it may contain specific achievements or aspirations
-  summary: "Results-driven Investment Banking Analyst with a strong background in financial modeling, M&A execution, and strategic advisory."
-
+  email: iancwm@msn.com
   location:
-    address: "123 Beacon St" # Street address (usually hidden)
-    postalCode: "02108" # Zip/Postal code
-    city: "Boston" # City
-    region: "MA" # State/Province/Region
-    countryCode: "US" # ISO Country code
-
-profiles:
-  - network: "LinkedIn"
-    username: "alexander-sterling"
-    url: "https://linkedin.com/in/alexander_sterling"
-  - network: "GitHub"
-    username: "asterling-finance"
-    url: "https://github.com/asterling-finance"
-
-# Example of a public override in a private file:
-# This field will be visible even when the --redacted flag is used.
-custom_public_note:
-  value: "Open to relocation for the right opportunity."
-  private: false
+    city: Singapore
+    region: Singapore
+  name: IAN CHONG WEI MING
+  phone: +65 9680 8118

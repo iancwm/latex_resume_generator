@@ -257,22 +257,30 @@
         function serializeEntries(containerId) {
             const container = document.getElementById(containerId);
             if (!container) return '[]';
-            
+
             const entries = [];
             const entryCards = container.querySelectorAll('.entry-card');
-            
+
+            // Fields that should be stored as arrays (split by newline)
+            const arrayFields = ['summary', 'highlights', 'keywords'];
+
             entryCards.forEach(card => {
                 const entry = {};
                 const inputs = card.querySelectorAll('input, textarea');
                 inputs.forEach(input => {
                     const name = input.getAttribute('data-field');
                     if (name) {
-                        entry[name] = input.value;
+                        let value = input.value;
+                        // Split textarea values into arrays for list fields
+                        if (arrayFields.includes(name) && value.trim()) {
+                            value = value.split('\n').filter(line => line.trim());
+                        }
+                        entry[name] = value;
                     }
                 });
                 entries.push(entry);
             });
-            
+
             return JSON.stringify(entries);
         }
         
